@@ -4,12 +4,12 @@
 
 using namespace std;
 
-Matrix::Matrix(int dx, int dy, bool random) {
-    fX = dx;
-    fY = dy;
-    for(int i=0; i<dx; i++) {
+Matrix::Matrix(int nRows, int nCols, bool random) {
+    fnRows = nRows;
+    fnCols = nCols;
+    for(int i=0; i<nRows; i++) {
         vector<double> tmp;
-        for(int j=0; j<dy; j++) {
+        for(int j=0; j<nCols; j++) {
             if(random) tmp.push_back(Utils::Rndm());
             else tmp.push_back(0.0);
         }
@@ -17,24 +17,33 @@ Matrix::Matrix(int dx, int dy, bool random) {
     }
 }
 
-void Matrix::Element(int x, int y, double value) {
-    fElements.at(x).at(y) = value;
+void Matrix::Element(int row, int col, double value) {
+    fElements.at(row).at(col) = value;
 }
 
-double Matrix::Element(int x, int y) {
-    return fElements.at(x).at(y);
+double Matrix::Element(int row, int col) {
+    return fElements.at(row).at(col);
 }
 
 Matrix Matrix::operator* (Matrix rhs) {
-    if(Y() != rhs.X()) cerr<<"Incorrect matrix dims: lhs->Y() = "<<Y()<<"\t rhs->X() = "<<rhs.X()<<endl;
+    if(nCols() != rhs.nRows()) { 
+        cerr<<"Incorrect matrix dims: lhs->nRows() = "<<nRows()<<"\t rhs->nCols() = "<<rhs.nCols()<<endl;
+        return Matrix(0,0);
+    }
     
     double tmpElement;
-    Matrix * m = new Matrix(X(),rhs.Y());
-    for(int i=0; i<X(); i++) {
-        for(int j=0; j<rhs.Y(); j++) {
+    Matrix * m = new Matrix(nRows(),rhs.nCols());
+    for(int i=0; i<nRows(); i++) {
+        for(int j=0; j<rhs.nCols(); j++) {
+            cout<<"Calculating element: "<<i<<" x "<<j<<endl;
             tmpElement = 0.0;
-            for(int k=0; k<Y(); k++) tmpElement += Element(j,k)*rhs.Element(k,i);
-            m->Element(j,i,tmpElement);
+            for(int k=0; k<nCols(); k++) { 
+                if(k != 0) cout<<" + ";
+                cout<<"("<<Element(i,k)<<flush<<" * "<<rhs.Element(k,j)<<flush<<")";
+                tmpElement += Element(i,k)*rhs.Element(k,j);
+            }
+            cout<<" = "<<tmpElement<<endl;
+            m->Element(i,j,tmpElement);
         }
     }
     
@@ -42,12 +51,12 @@ Matrix Matrix::operator* (Matrix rhs) {
 }
 
 void Matrix::Print() {
-    cout.precision(6);
+    cout.precision(4);
     cout<<fixed;
     cout<<"---------------------------------"<<endl;
-    cout<<"Matrix: "<<Y()<<" x "<<X()<<endl;
-    for(int i=0; i<fX; i++) {
-        for(int j=0; j<fY; j++) { 
+    cout<<"Matrix: "<<nRows()<<" x "<<nCols()<<endl;
+    for(int i=0; i<nRows(); i++) {
+        for(int j=0; j<nCols(); j++) { 
             cout<<fElements.at(i).at(j)<<"\t";   
         }
         cout<<endl;

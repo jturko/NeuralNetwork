@@ -10,24 +10,24 @@ using namespace std;
 class Matrix
 {
   public:
-    Matrix(int dx, int dy, bool random=true);
+    Matrix(int rows, int cols, bool random=true);
 
     Matrix operator* (Matrix rhs);
 
-    int X() { return fX; }
-    void X(int x) { fX = x; }
+    int nRows() { return fnRows; }
+    void nRows(int nRows) { fnRows = nRows; }
 
-    int Y() { return fY; }
-    void Y(int y) { fY = y; }
+    int nCols() { return fnCols; }
+    void nCols(int nCols) { fnCols = nCols; }
 
-    double Element(int x, int y);
-    void Element(int x, int y, double value);
+    double Element(int row, int col);
+    void Element(int row, int col, double value);
 
     void Print();
 
   private:
-    int fX;
-    int fY;
+    int fnRows;
+    int fnCols;
     vector< vector<double> > fElements;
 
 };
