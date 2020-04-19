@@ -1,4 +1,7 @@
 
+#ifndef NEURON_HH
+#define NEURON_HH
+
 #include <iostream>
 
 using namespace std;
@@ -12,12 +15,17 @@ class Neuron
     double ActivationRaw() { return fActivationRaw; } 
     void ActivationRaw(double activation) { fActivationRaw = activation; }
     
-    double ActivationReLU();
     double Activation();
+    double ActivationReLU();
+
+    double ActivationDerivative();
+    double ActivationDerivativeReLU();
 
     void Print();
 
   private:
     double fActivationRaw;
 };
+
+#endif
 

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Matrix::Matrix(int dx, int dy, bool random=true) {
+Matrix::Matrix(int dx, int dy, bool random) {
     fX = dx;
     fY = dy;
     for(int i=0; i<dx; i++) {
@@ -45,6 +45,7 @@ void Matrix::Print() {
     cout.precision(6);
     cout<<fixed;
     cout<<"---------------------------------"<<endl;
+    cout<<"Matrix: "<<Y()<<" x "<<X()<<endl;
     for(int i=0; i<fX; i++) {
         for(int j=0; j<fY; j++) { 
             cout<<fElements.at(i).at(j)<<"\t";   

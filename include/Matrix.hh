@@ -1,4 +1,7 @@
 
+#ifndef MATRIX_HH
+#define MATRIX_HH
+
 #include <iostream>
 #include <vector>
 
@@ -7,7 +10,7 @@ using namespace std;
 class Matrix
 {
   public:
-    Matrix(int dx, int dy, bool random);
+    Matrix(int dx, int dy, bool random=true);
 
     Matrix operator* (Matrix rhs);
 
@@ -28,4 +31,6 @@ class Matrix
     vector< vector<double> > fElements;
 
 };
+
+#endif
 
