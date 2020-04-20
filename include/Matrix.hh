@@ -13,6 +13,7 @@ class Matrix
     Matrix(int rows, int cols, bool random=true);
 
     Matrix operator* (Matrix rhs);
+    Matrix operator+ (Matrix rhs);
 
     int nRows() { return fnRows; }
     void nRows(int nRows) { fnRows = nRows; }

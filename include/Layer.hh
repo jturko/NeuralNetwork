@@ -10,18 +10,19 @@
 class Layer 
 {
   public:
-    Layer(int n);
+    Layer(int nNeurons);
     
-    int NumNeurons() { return fNumNeurons; }
+    int nNeurons() { return fnNeurons; }
     std::vector<Neuron*> Neurons() { return fNeurons; }
 
     Matrix * ColumnVector();
     Matrix * RowVector();    
 
-    void Print();
+    void SetActivationsRaw(Matrix m);
+    void SetActivationRaw(int neuron, double value);
 
   private:
-    int fNumNeurons;
+    int fnNeurons;
     std::vector<Neuron*> fNeurons;
 
 };

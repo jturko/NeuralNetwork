@@ -10,3 +10,4 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
 # add the executable
 add_executable(NeuralNetwork ${PROJECT_SOURCE_DIR}/main.cc ${sources} ${headers})
+
