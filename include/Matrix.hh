@@ -14,6 +14,7 @@ class Matrix
 
     Matrix operator* (Matrix rhs);
     Matrix operator+ (Matrix rhs);
+    Matrix operator- (Matrix rhs);
 
     int nRows() { return fnRows; }
     void nRows(int nRows) { fnRows = nRows; }

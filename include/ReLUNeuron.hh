@@ -14,9 +14,6 @@ class ReLUNeuron : public Neuron
     ReLUNeuron();
     ReLUNeuron(double activation);
     
-    double ActivationRaw() { return fActivationRaw; } 
-    void ActivationRaw(double activation) { fActivationRaw = activation; }
-    
     double Activation();
     double ActivationDerivative();
 };

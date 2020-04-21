@@ -63,6 +63,24 @@ Matrix Matrix::operator+ (Matrix rhs) {
     return *m;
 }
 
+Matrix Matrix::operator- (Matrix rhs) {
+    if(nRows() != rhs.nRows() || nCols() != rhs.nCols()) { 
+        cerr<<"Incorrect matrix dims: lhs->nRows() = "<<nRows()<<"\t rhs->nRows() = "<<rhs.nRows()<<endl;
+        cerr<<"                       lhs->nCols() = "<<nCols()<<"\t rhs->nCols() = "<<rhs.nCols()<<endl;
+        assert(false);
+        return Matrix(0,0);
+    }
+    
+    Matrix * m = new Matrix(nRows(),nCols());
+    for(int i=0; i<nRows(); i++) {
+        for(int j=0; j<nCols(); j++) {
+            m->Element(i,j,Element(i,j)-rhs.Element(i,j));
+        }
+    }
+    
+    return *m;
+}
+
 void Matrix::Print() {
     cout.precision(4);
     cout<<fixed;
@@ -73,6 +91,6 @@ void Matrix::Print() {
         }
         cout<<endl;
     }
-    cout<<"---------------------------------"<<endl;
+    //cout<<"---------------------------------"<<endl;
 }
 

@@ -25,13 +25,14 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
     for(int i=0; i<nLayers()-1; i++) {
         fLayers.at(i+1)->ActivationsRaw((*fLayers.at(i)->RowVector())*(*fMatrices.at(i)));
         if(verbose) {
-            cout<<" Layer "<<i<<":"<<endl;
+            if(i==0) cout<<" --> First Layer: "<<endl;
+            else cout<<" --> Layer "<<i<<":"<<endl;
             fLayers.at(i)->RowVector()->Print();
-            cout<<" Matrix from layer "<<i<<" -> "<<i+1<<endl;
+            cout<<" --> Matrix from layer "<<i<<" -> "<<i+1<<endl;
             fMatrices.at(i)->Print();
         }
     }
-    cout<<" Output Layer: "<<endl;
+    cout<<" --> Output Layer: "<<endl;
     if(verbose) OutputLayer()->RowVector()->Print();
 }
 

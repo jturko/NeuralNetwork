@@ -14,9 +14,6 @@ class SigmoidNeuron : public Neuron
     SigmoidNeuron();
     SigmoidNeuron(double activation);
     
-    double ActivationRaw() { return fActivationRaw; } 
-    void ActivationRaw(double activation) { fActivationRaw = activation; }
-    
     double Activation();
     double ActivationDerivative();
 };
