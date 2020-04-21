@@ -27,7 +27,9 @@ double Matrix::Element(int row, int col) {
 
 Matrix Matrix::operator* (Matrix rhs) {
     if(nCols() != rhs.nRows()) { 
-        cerr<<"Incorrect matrix dims: lhs->nCols() = "<<nCols()<<"\t rhs->nRows() = "<<rhs.nRows()<<endl;
+        cerr<<"Error in Matrix::opertor* (Matrix ):"<<endl;
+        cerr<<"incorrect matrix dims: lhs: "<<nRows()<<" x "<<nCols()<<endl;
+        cerr<<"                       rhs: "<<rhs.nRows()<<" x "<<rhs.nCols()<<endl;
         assert(false);
         return Matrix(0,0);
     }
@@ -47,8 +49,9 @@ Matrix Matrix::operator* (Matrix rhs) {
 
 Matrix Matrix::operator+ (Matrix rhs) {
     if(nRows() != rhs.nRows() || nCols() != rhs.nCols()) { 
-        cerr<<"Incorrect matrix dims: lhs->nRows() = "<<nRows()<<"\t rhs->nRows() = "<<rhs.nRows()<<endl;
-        cerr<<"                       lhs->nCols() = "<<nCols()<<"\t rhs->nCols() = "<<rhs.nCols()<<endl;
+        cerr<<"Error in Matrix::opertor+ (Matrix ):"<<endl;
+        cerr<<"incorrect matrix dims: lhs: "<<nRows()<<" x "<<nCols()<<endl;
+        cerr<<"                       rhs: "<<rhs.nRows()<<" x "<<rhs.nCols()<<endl;
         assert(false);
         return Matrix(0,0);
     }
@@ -65,8 +68,9 @@ Matrix Matrix::operator+ (Matrix rhs) {
 
 Matrix Matrix::operator- (Matrix rhs) {
     if(nRows() != rhs.nRows() || nCols() != rhs.nCols()) { 
-        cerr<<"Incorrect matrix dims: lhs->nRows() = "<<nRows()<<"\t rhs->nRows() = "<<rhs.nRows()<<endl;
-        cerr<<"                       lhs->nCols() = "<<nCols()<<"\t rhs->nCols() = "<<rhs.nCols()<<endl;
+        cerr<<"Error in Matrix::opertor- (Matrix ):"<<endl;
+        cerr<<"incorrect matrix dims: lhs: "<<nRows()<<" x "<<nCols()<<endl;
+        cerr<<"                       rhs: "<<rhs.nRows()<<" x "<<rhs.nCols()<<endl;
         assert(false);
         return Matrix(0,0);
     }
@@ -79,6 +83,17 @@ Matrix Matrix::operator- (Matrix rhs) {
     }
     
     return *m;
+}
+
+Matrix * Matrix::Transpose() {
+    Matrix * m = new Matrix(nCols(),nRows());
+    for(int r=0; r<nRows(); r++) {
+        for(int c=0; c<nCols(); c++) {
+            m->Element(c,r,Element(r,c));
+        }
+    }
+    
+    return m;
 }
 
 void Matrix::Print() {

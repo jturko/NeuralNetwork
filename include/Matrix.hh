@@ -25,6 +25,8 @@ class Matrix
     double Element(int row, int col);
     void Element(int row, int col, double value);
 
+    Matrix * Transpose();
+
     void Print();
 
   private:

@@ -39,7 +39,14 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
 
 void NeuralNetwork::InputLayer(Layer * input) { 
     if(input->nNeurons() != fTopology.at(0)) {
-        cerr<<"Error: input->nNeurons()="<<input->nNeurons()<<" != fTopology->at(0)="<<fTopology.at(0)<<endl;
+        cerr<<"Error in NeuralNetwork::InputLayer(Layer* ) :"<<endl;
+        cerr<<"input->nNeurons()="<<input->nNeurons()<<" != fTopology->at(0)="<<fTopology.at(0)<<endl;
+        assert(false);
+        return;
+    }
+    if(input->NeuronType() != this->NeuronType()) {
+        cerr<<"Error in NeuralNetwork::InputLayer(Layer* ) :"<<endl;
+        cerr<<"input->NeuronType()="<<input->NeuronType()<<" != this->NeuronType()="<<this->NeuronType()<<endl;
         assert(false);
         return;
     }
@@ -48,7 +55,8 @@ void NeuralNetwork::InputLayer(Layer * input) {
 
 void NeuralNetwork::InputLayer(vector<double> values) {
     if(values.size() != fTopology.at(0)) {
-        cerr<<"Error: values.size()="<<values.size()<<" != fTopology.at(0)="<<fTopology.at(0)<<endl;
+        cerr<<"Error in NeuralNetwork::InputLayer(vector<double> ) :"<<endl;
+        cerr<<"values.size()="<<values.size()<<" != fTopology.at(0)="<<fTopology.at(0)<<endl;
         assert(false);
         return;
     }
@@ -59,7 +67,14 @@ void NeuralNetwork::InputLayer(vector<double> values) {
 
 void NeuralNetwork::OutputLayer(Layer * output) { 
     if(output->nNeurons() != fTopology.at(fLayers.size()-1)) {
-        cerr<<"Error: output->nNeurons()="<<output->nNeurons()<<" != fTopology->at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+        cerr<<"Error in NeuralNetwork::OutputLayer(Layer* ) :"<<endl;
+        cerr<<"output->nNeurons()="<<output->nNeurons()<<" != fTopology->at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+        assert(false);
+        return;
+    }
+    if(output->NeuronType() != this->NeuronType()) {
+        cerr<<"Error in NeuralNetwork::OutputLayer(Layer* ) :"<<endl;
+        cerr<<"output->NeuronType()="<<output->NeuronType()<<" != this->NeuronType()="<<this->NeuronType()<<endl;
         assert(false);
         return;
     }
@@ -68,7 +83,8 @@ void NeuralNetwork::OutputLayer(Layer * output) {
 
 void NeuralNetwork::OutputLayer(vector<double> values) {
     if(values.size() != fTopology.at(fLayers.size()-1)) {
-        cerr<<"Error: values.size()="<<values.size()<<" != fTopology.at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+        cerr<<"Error in NeuralNetwork::OutputLayer(vector<double> ) :"<<endl;
+        cerr<<"values.size()="<<values.size()<<" != fTopology.at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
         assert(false);
         return;
     }

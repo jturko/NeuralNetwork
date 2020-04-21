@@ -3,14 +3,15 @@
 #include "SigmoidNeuron.hh"
 #include "ReLUNeuron.hh"
 
-Layer::Layer(int nNeurons, string type) {
+Layer::Layer(int nNeurons, string neuronType) {
     fnNeurons = nNeurons;
     for(int i=0; i<nNeurons; i++) {
+        fNeuronType = neuronType;
         Neuron * neuron = NULL;
-        if(type=="SigmoidNeuron") neuron = new SigmoidNeuron;
-        else if(type=="ReLUNeuron") neuron = new ReLUNeuron;
+        if(neuronType=="SigmoidNeuron") neuron = new SigmoidNeuron;
+        else if(neuronType=="ReLUNeuron") neuron = new ReLUNeuron;
         else {
-            cout<<"Unknown neuron type: "<<type<<endl;
+            cout<<"Unknown neuron type: "<<neuronType<<endl;
             assert(false);
             return;
         }

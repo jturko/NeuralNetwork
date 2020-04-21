@@ -14,6 +14,8 @@ class NeuralNetwork
     vector<int> Topology() { return fTopology; }
     int nLayers() { return fTopology.size(); }
     
+    string NeuronType() { return fNeuronType; }
+
     void BuildNetwork();
     void ForwardPropagate(bool verbose=false);
     void BackwardPropagate(bool verbose=false);

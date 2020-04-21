@@ -26,7 +26,10 @@ class Layer
 
     double ActivationRaw(int neuron) { return fNeurons.at(neuron)->ActivationRaw(); }
 
+    string NeuronType() { return fNeuronType; }
+
   private:
+    string fNeuronType;
     int fnNeurons;
     vector<Neuron*> fNeurons;
 
