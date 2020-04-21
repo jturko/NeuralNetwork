@@ -1,27 +1,29 @@
 
 #include "NeuralNetwork.hh"
 
-NeuralNetwork::NeuralNetwork(vector<int> topology) {
+NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType) {
     fTopology = topology;
+    fNeuronType = neuronType;
     BuildNetwork();
 }
 
 void NeuralNetwork::BuildNetwork() {
+    cout<<"Building neural network, type: "<<fNeuronType<<endl;
     for(int i=0; i<nLayers()-1; i++) {
-        Layer * l = new Layer(fTopology.at(i));
+        Layer * l = new Layer(fTopology.at(i), fNeuronType);
         fLayers.push_back(l);
         Matrix * m = new Matrix(fTopology.at(i),fTopology.at(i+1));
         fMatrices.push_back(m);
         m = new Matrix(fTopology.at(i),fTopology.at(i+1));
         fBiasMatrices.push_back(m);
     }
-    Layer * l = new Layer(fTopology.at(fTopology.size()-1));
+    Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
     fLayers.push_back(l);
 }
 
 void NeuralNetwork::ForwardPropagate(bool verbose) {
     for(int i=0; i<nLayers()-1; i++) {
-        fLayers.at(i+1)->SetActivationsRaw((*fLayers.at(i)->RowVector())*(*fMatrices.at(i)));
+        fLayers.at(i+1)->ActivationsRaw((*fLayers.at(i)->RowVector())*(*fMatrices.at(i)));
         if(verbose) {
             cout<<" Layer "<<i<<":"<<endl;
             fLayers.at(i)->RowVector()->Print();
@@ -50,7 +52,7 @@ void NeuralNetwork::InputLayer(vector<double> values) {
         return;
     }
     for(int i=0; i<fTopology.at(0); i++) {
-        fLayers.at(0)->SetActivationRaw(i, values.at(i));
+        fLayers.at(0)->ActivationRaw(i, values.at(i));
     }    
 }
 
@@ -70,7 +72,7 @@ void NeuralNetwork::OutputLayer(vector<double> values) {
         return;
     }
     for(int i=0; i<fTopology.at(0); i++) {
-        fLayers.at(fLayers.size()-1)->SetActivationRaw(i, values.at(i));
+        fLayers.at(fLayers.size()-1)->ActivationRaw(i, values.at(i));
     }    
 }
 

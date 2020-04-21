@@ -15,15 +15,12 @@ class Neuron
     double ActivationRaw() { return fActivationRaw; } 
     void ActivationRaw(double activation) { fActivationRaw = activation; }
     
-    double Activation();
-    double ActivationReLU();
-
-    double ActivationDerivative();
-    double ActivationDerivativeReLU();
+    virtual double Activation() = 0; 
+    virtual double ActivationDerivative() = 0;
 
     void Print();
 
-  private:
+  protected:
     double fActivationRaw;
 };
 

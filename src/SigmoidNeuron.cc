@@ -18,13 +18,3 @@ double SigmoidNeuron::Activation() {
 double SigmoidNeuron::ActivationDerivative() {
     return Activation()*(1.-Activation());
 }
-
-void SigmoidNeuron::Print() {
-    cout<<"---------------------------------"<<endl;
-    cout<<"SigmoidNeuron:"<<endl;
-    cout<<"ActivationRaw() = "<<ActivationRaw()<<endl;
-    cout<<"Activation() = "<<Activation()<<endl;
-    cout<<"ActivationDerivative() = "<<ActivationDerivative()<<endl;
-    cout<<"---------------------------------"<<endl;
-}
-

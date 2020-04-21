@@ -3,27 +3,32 @@
 #define LAYER_HH
 
 #include <vector>
+#include <string>
 
 #include "Neuron.hh"
 #include "Matrix.hh"
 
+using namespace std;
+
 class Layer 
 {
   public:
-    Layer(int nNeurons);
+    Layer(int nNeurons, string type);
     
     int nNeurons() { return fnNeurons; }
-    std::vector<Neuron*> Neurons() { return fNeurons; }
+    vector<Neuron*> Neurons() { return fNeurons; }
 
     Matrix * ColumnVector();
     Matrix * RowVector();    
 
-    void SetActivationsRaw(Matrix m);
-    void SetActivationRaw(int neuron, double value);
+    void ActivationsRaw(Matrix m);
+    void ActivationRaw(int neuron, double value);
+
+    double ActivationRaw(int neuron) { return fNeurons.at(neuron)->ActivationRaw(); }
 
   private:
     int fnNeurons;
-    std::vector<Neuron*> fNeurons;
+    vector<Neuron*> fNeurons;
 
 };
 

@@ -4,9 +4,11 @@
 
 #include <iostream>
 
+#include "Neuron.hh"
+
 using namespace std;
 
-class SigmoidNeuron
+class SigmoidNeuron : public Neuron
 {
   public:
     SigmoidNeuron();
@@ -17,11 +19,6 @@ class SigmoidNeuron
     
     double Activation();
     double ActivationDerivative();
-
-    void Print();
-
-  private:
-    double fActivationRaw;
 };
 
 #endif

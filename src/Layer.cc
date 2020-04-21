@@ -1,9 +1,21 @@
 
 #include "Layer.hh"
+#include "SigmoidNeuron.hh"
+#include "ReLUNeuron.hh"
 
-Layer::Layer(int nNeurons) {
+Layer::Layer(int nNeurons, string type) {
     fnNeurons = nNeurons;
-    for(int i=0; i<nNeurons; i++) fNeurons.push_back(new Neuron);
+    for(int i=0; i<nNeurons; i++) {
+        Neuron * neuron = NULL;
+        if(type=="SigmoidNeuron") neuron = new SigmoidNeuron;
+        else if(type=="ReLUNeuron") neuron = new ReLUNeuron;
+        else {
+            cout<<"Unknown neuron type: "<<type<<endl;
+            assert(false);
+            return;
+        }
+        fNeurons.push_back(neuron);
+    }
 }
 
 Matrix * Layer::RowVector() {
@@ -20,13 +32,14 @@ Matrix * Layer::ColumnVector() {
     return m;
 }
 
-void Layer::SetActivationRaw(int neuron, double value) {
+void Layer::ActivationRaw(int neuron, double value) {
     fNeurons.at(neuron)->ActivationRaw(value);
 }
 
-void Layer::SetActivationsRaw(Matrix m) {
+void Layer::ActivationsRaw(Matrix m) {
     if(m.nRows() != 1 || m.nCols() != fnNeurons) {
         cerr<<"Wrong dimensions for input matrix, cannot set as layer activations"<<endl;
+        assert(false);
         return;
     }
     

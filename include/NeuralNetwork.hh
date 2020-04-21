@@ -1,12 +1,15 @@
 
 #include <vector>
+#include <string>
 
 #include "Layer.hh"
+
+using namespace std;
 
 class NeuralNetwork 
 {
   public:
-    NeuralNetwork(vector<int> topology);
+    NeuralNetwork(vector<int> topology, string neuronType);
 
     vector<int> Topology() { return fTopology; }
     int nLayers() { return fTopology.size(); }
@@ -24,6 +27,7 @@ class NeuralNetwork
     void OutputLayer(vector<double> values);
 
   private:
+    string fNeuronType;
     vector<int> fTopology;
     vector<Layer *> fLayers;
     vector<Matrix *> fMatrices; 

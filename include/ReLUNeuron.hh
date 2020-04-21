@@ -4,9 +4,11 @@
 
 #include <iostream>
 
+#include "Neuron.hh"
+
 using namespace std;
 
-class ReLUNeuron
+class ReLUNeuron : public Neuron
 {
   public:
     ReLUNeuron();
@@ -17,11 +19,6 @@ class ReLUNeuron
     
     double Activation();
     double ActivationDerivative();
-
-    void Print();
-
-  private:
-    double fActivationRaw;
 };
 
 #endif

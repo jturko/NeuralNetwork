@@ -19,12 +19,3 @@ double ReLUNeuron::ActivationDerivative() {
     else return 1.;
 }
 
-void ReLUNeuron::Print() {
-    cout<<"---------------------------------"<<endl;
-    cout<<"ReLUNeuron:"<<endl;
-    cout<<"ActivationRaw() = "<<ActivationRaw()<<endl;
-    cout<<"Activation() = "<<Activation()<<endl;
-    cout<<"ActivationDerivative() = "<<ActivationDerivative()<<endl;
-    cout<<"---------------------------------"<<endl;
-}
-
