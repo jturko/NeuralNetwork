@@ -6,17 +6,62 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <random>
 
 using namespace std;
-
+    
 namespace Utils {
-    inline double Rndm() { return std::rand()/double(RAND_MAX); }
+    inline double Rndm() { return rand()/double(RAND_MAX); }
     inline double Rndm(double low, double high) { return (low+(high-low)*Rndm()); }
+    inline double RndmGaus(double mean, double stddev) {//Box muller method
+        static double n2 = 0.0;
+        static int n2_cached = 0;
+        if (!n2_cached)
+        {
+            double x, y, r;
+            do
+            {
+                x = 2.0*rand()/RAND_MAX - 1;
+                y = 2.0*rand()/RAND_MAX - 1;
+    
+                r = x*x + y*y;
+            }
+            while (r == 0.0 || r > 1.0);
+            {
+                double d = sqrt(-2.0*log(r)/r);
+                double n1 = x*d;
+                n2 = y*d;
+                double result = n1*stddev + mean;
+                n2_cached = 1;
+                return result;
+            }
+        }
+        else
+        {
+            n2_cached = 0;
+            return n2*stddev + mean;
+        }
+    }
 
+    inline Matrix HadamardProduct(Matrix m1, Matrix m2) {
+        if(m1.nRows() != m2.nRows() || m1.nCols() != m2.nCols()) {
+            cerr<<"Wrong dimensions for Hadamard product - m1: "<<m1.nRows()<<"x"<<m1.nCols()<<endl;
+            cerr<<"                                        m2: "<<m2.nRows()<<"x"<<m2.nCols()<<endl;
+            assert(false);
+            return Matrix(0,0);
+        }    
+        Matrix m3(m1.nRows(), m1.nCols());
+        for(int i=0; i<m1.nRows(); i++) {
+            for(int j=0; j<m1.nCols(); j++) {
+                m3.Element(i,j,m1.Element(i,j)+m2.Element(i,j));
+            }
+        }
+        return m3;
+    }
+    
     // code for reading MNIST data taken from: 
     // https://stackoverflow.com/questions/8286668/how-to-read-mnist-data-in-c
-    inline int reverseInt (int i) 
-    {
+    inline int reverseInt (int i) {
         unsigned char c1, c2, c3, c4;
     
         c1 = i & 255;

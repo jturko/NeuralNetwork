@@ -74,3 +74,4 @@ vector<double> Layer::ActivationsRaw() {
     for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->ActivationRaw());
     return output;
 }
+

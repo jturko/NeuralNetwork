@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
     Layer * input = new Layer(topology.at(0), neuronType);
     double value = 0.;
     for(int i=0; i<topology.at(0); i++) {
-        input->ActivationRaw(i, Utils::Rndm(-5.,5.));
+        input->ActivationRaw(i, Utils::RndmGaus(0.,1.));
     }
 
     // build the network based on the given topology
