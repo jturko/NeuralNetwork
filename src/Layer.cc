@@ -33,6 +33,20 @@ Matrix * Layer::ColumnVector() {
     return m;
 }
 
+Matrix * Layer::RowVectorRaw() {
+    Matrix * m = new Matrix(1, fnNeurons);
+    for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->ActivationRaw());
+
+    return m;
+}
+
+Matrix * Layer::ColumnVectorRaw() {
+    Matrix * m = new Matrix(fnNeurons, 1);
+    for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->ActivationRaw());
+
+    return m;
+}
+
 void Layer::ActivationRaw(int neuron, double value) {
     fNeurons.at(neuron)->ActivationRaw(value);
 }
@@ -49,3 +63,14 @@ void Layer::ActivationsRaw(Matrix m) {
     }
 }   
 
+vector<double> Layer::Activations() {
+    vector<double> output;
+    for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->Activation());
+    return output;
+}
+
+vector<double> Layer::ActivationsRaw() {
+    vector<double> output;
+    for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->ActivationRaw());
+    return output;
+}

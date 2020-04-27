@@ -20,6 +20,9 @@ class Layer
 
     Matrix * ColumnVector();
     Matrix * RowVector();    
+    
+    Matrix * ColumnVectorRaw();
+    Matrix * RowVectorRaw();    
 
     void ActivationsRaw(Matrix m);
     void ActivationRaw(int neuron, double value);
@@ -28,6 +31,9 @@ class Layer
 
     string NeuronType() { return fNeuronType; }
 
+    vector<double> Activations();
+    vector<double> ActivationsRaw();
+    
   private:
     string fNeuronType;
     int fnNeurons;

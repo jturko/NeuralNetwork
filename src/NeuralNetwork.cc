@@ -1,7 +1,11 @@
 
+#include <cmath>
+
 #include "NeuralNetwork.hh"
 
 NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType) {
+    fTargetLayer = NULL;
+    fTargetLayerSet = false;
     fTopology = topology;
     fNeuronType = neuronType;
     BuildNetwork();
@@ -14,8 +18,8 @@ void NeuralNetwork::BuildNetwork() {
         fLayers.push_back(l);
         Matrix * m = new Matrix(fTopology.at(i),fTopology.at(i+1));
         fMatrices.push_back(m);
-        m = new Matrix(fTopology.at(i),fTopology.at(i+1));
-        fBiasMatrices.push_back(m);
+        Matrix * bm = new Matrix(1,fTopology.at(i+1));
+        fBiasMatrices.push_back(bm);
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
     fLayers.push_back(l);
@@ -23,17 +27,33 @@ void NeuralNetwork::BuildNetwork() {
 
 void NeuralNetwork::ForwardPropagate(bool verbose) {
     for(int i=0; i<nLayers()-1; i++) {
-        fLayers.at(i+1)->ActivationsRaw((*fLayers.at(i)->RowVector())*(*fMatrices.at(i)));
+        fLayers.at(i+1)->ActivationsRaw(((*fLayers.at(i)->RowVector())*(*fMatrices.at(i)))+(*fBiasMatrices.at(i)));
         if(verbose) {
-            if(i==0) cout<<" --> First Layer: "<<endl;
-            else cout<<" --> Layer "<<i<<":"<<endl;
+            if(i==0) cout<<endl<<"----> First Layer: "<<endl;
+            else cout<<endl<<"----> Layer "<<i<<":"<<endl;
+            cout<<" -> Raw values:"<<endl;
+            fLayers.at(i)->RowVectorRaw()->Print();
+            cout<<" -> Activated values:"<<endl;
             fLayers.at(i)->RowVector()->Print();
-            cout<<" --> Matrix from layer "<<i<<" -> "<<i+1<<endl;
+            cout<<" -> Matrix from layer "<<i<<" -> "<<i+1<<endl;
             fMatrices.at(i)->Print();
+            cout<<" -> Bias matrix from layer "<<i<<" -> "<<i+1<<endl;
+            fBiasMatrices.at(i)->Print();
         }
     }
-    cout<<" --> Output Layer: "<<endl;
-    if(verbose) OutputLayer()->RowVector()->Print();
+    cout<<endl<<"----> Output Layer: "<<endl;
+    if(verbose) { 
+        cout<<" -> Raw values:"<<endl;
+        OutputLayer()->RowVectorRaw()->Print();
+        cout<<" -> Activated values:"<<endl;
+        OutputLayer()->RowVector()->Print();
+    }
+   
+    // if target output set, calculate cost
+    if(fTargetLayerSet) {
+        CalculateCost();
+        if(verbose) cout<<" -> Cost f'n: "<<fCost<<endl;
+    }
 }
 
 
@@ -92,4 +112,44 @@ void NeuralNetwork::OutputLayer(vector<double> values) {
         fLayers.at(fLayers.size()-1)->ActivationRaw(i, values.at(i));
     }    
 }
+
+void NeuralNetwork::TargetLayer(Layer * target) { 
+    if(target->nNeurons() != fTopology.at(fLayers.size()-1)) {
+        cerr<<"Error in NeuralNetwork::TargetLayer(Layer* ) :"<<endl;
+        cerr<<"target->nNeurons()="<<target->nNeurons()<<" != fTopology->at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+        assert(false);
+        return;
+    }
+    if(target->NeuronType() != this->NeuronType()) {
+        cerr<<"Error in NeuralNetwork::TargetLayer(Layer* ) :"<<endl;
+        cerr<<"target->NeuronType()="<<target->NeuronType()<<" != this->NeuronType()="<<this->NeuronType()<<endl;
+        assert(false);
+        return;
+    }
+    fTargetLayer = target; 
+    fTargetLayerSet = true;
+}
+
+void NeuralNetwork::TargetLayer(vector<double> values) {
+    if(values.size() != fTopology.at(fLayers.size()-1)) {
+        cerr<<"Error in NeuralNetwork::TargetLayer(vector<double> ) :"<<endl;
+        cerr<<"values.size()="<<values.size()<<" != fTopology.at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+        assert(false);
+        return;
+    }
+    for(int i=0; i<fTopology.at(0); i++) {
+        fTargetLayer->ActivationRaw(i, values.at(i));
+    }    
+    fTargetLayerSet = true;
+}
+
+double NeuralNetwork::CalculateCost() {
+    fTargetLayerSet = false;
+    fCost = 0.;
+    for(int i=0; i<fTopology.at(fLayers.size()-1); i++) { // quadratic cost
+        fCost += pow(TargetLayer()->Neurons().at(i)->Activation() - OutputLayer()->Neurons().at(i)->Activation(), 2.);
+    }
+    return fCost;
+}
+
 
