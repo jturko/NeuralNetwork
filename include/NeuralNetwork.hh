@@ -10,15 +10,17 @@ class NeuralNetwork
 {
   public:
     NeuralNetwork(vector<int> topology, string neuronType);
+    
+    void BuildNetwork();
+    void ForwardPropagate(bool verbose=false);
+    double CalculateCost();
+    void BackwardPropagate(bool verbose=false);
+    void UpdateNetwork();
 
     vector<int> Topology() { return fTopology; }
     int nLayers() { return fTopology.size(); }
     
     string NeuronType() { return fNeuronType; }
-
-    void BuildNetwork();
-    void ForwardPropagate(bool verbose=false);
-    void BackwardPropagate(bool verbose=false);
 
     Layer * InputLayer() { return fLayers.at(0); }
     void InputLayer(Layer * input);
@@ -32,7 +34,12 @@ class NeuralNetwork
     void TargetLayer(Layer * target);
     void TargetLayer(vector<double> values);
 
-    double CalculateCost();
+    double Cost() { return fCost; }
+
+    vector<Layer *> Layers() { return fLayers; }
+    vector<Matrix *> Matrices() { return fMatrices; }
+    vector<Matrix *> BiasMatrices() { return fBiasMatrices; }
+    vector<Matrix *> ErrorMatrices() { return fErrorMatrices; }
 
   private:
     string fNeuronType;
@@ -40,11 +47,14 @@ class NeuralNetwork
     vector<Layer *> fLayers;
     vector<Matrix *> fMatrices; 
     vector<Matrix *> fBiasMatrices; 
+    vector<Matrix *> fErrorMatrices; 
 
     Layer * fTargetLayer;
     bool fTargetLayerSet;
     double fCost;
     Matrix * fCostDerivatives;
+
+    double fLearningRate;
 
 };
 

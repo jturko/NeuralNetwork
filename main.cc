@@ -23,9 +23,10 @@ int main(int argc, char * argv[])
     //Utils::read_mnist();
 
     vector<int> topology;
+    topology.push_back(1);
     topology.push_back(2);
     topology.push_back(3);
-    topology.push_back(2);
+    topology.push_back(1);
 
     string neuronType = "SigmoidNeuron";
 
@@ -39,11 +40,22 @@ int main(int argc, char * argv[])
     // build the network based on the given topology
     // the matrices are initialied as random
     NeuralNetwork * network = new NeuralNetwork(topology, neuronType);
-    network->InputLayer(input);
-    network->TargetLayer(input);
-    network->ForwardPropagate(true);
-    network->BackwardPropagate(true);
+    //network->InputLayer(input);
+    //network->TargetLayer(input);
+    //network->ForwardPropagate(true);
+    //network->BackwardPropagate(true);
 
+    for(int i=0; i<100000; i++) {
+        for(int i=0; i<topology.at(0); i++) input->WeightedInput(i, Utils::RndmGaus(0.,1.));
+        network->InputLayer(input);
+        network->TargetLayer(input);    
+        network->ForwardPropagate();
+        network->BackwardPropagate();
+        network->UpdateNetwork();
+        //network->Matrices().at(0)->Print();
+        cout<<network->Cost()<<endl;
+    }
+    
     return 0;
 }
 

@@ -5,6 +5,7 @@
 #include "NeuralNetwork.hh"
 
 NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType) {
+    fLearningRate = 10.; // random value
     fTargetLayer = NULL;
     fCostDerivatives = NULL;
     fTargetLayerSet = false;
@@ -33,32 +34,31 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
         Matrix * weighted_input = Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i));
         fLayers.at(i+1)->WeightedInputs(weighted_input);
         if(verbose) {
-            if(i==0) cout<<endl<<"----> Input Layer: "<<endl;
-            else cout<<endl<<"----> Layer "<<i<<":"<<endl;
-            cout<<" -> Raw values:"<<endl;
+            if(i==0) cout<<endl<<" ---> INPUT LAYER: "<<endl;
+            else cout<<endl<<" ---> LAYER "<<i<<":"<<endl;
+            cout<<"  -> Weighted input values:"<<endl;
             fLayers.at(i)->ColumnVectorRaw()->Print();
-            cout<<" -> Activated values:"<<endl;
+            cout<<"  -> Activated values:"<<endl;
             fLayers.at(i)->ColumnVector()->Print();
-            cout<<" -> Matrix from layer "<<i<<" -> "<<i+1<<endl;
+            cout<<"  -> Matrix from layer "<<i<<" -> "<<i+1<<endl;
             fMatrices.at(i)->Print();
-            cout<<" -> Bias matrix from layer "<<i<<" -> "<<i+1<<endl;
+            cout<<"  -> Bias matrix from layer "<<i<<" -> "<<i+1<<endl;
             fBiasMatrices.at(i)->Print();
         }
     }
-    cout<<"----> Output Layer: "<<endl;
     if(verbose) { 
-        cout<<" -> Raw values:"<<endl;
+        cout<<endl<<" ---> OUTPUT LAYER: "<<endl;
+        cout<<"  -> Weighted input values:"<<endl;
         OutputLayer()->ColumnVectorRaw()->Print();
-        cout<<" -> Activated values:"<<endl;
+        cout<<"  -> Activated values:"<<endl;
         OutputLayer()->ColumnVector()->Print();
     }
    
-    // if target output set, calculate cost
     if(fTargetLayerSet) {
         CalculateCost();
-        if(verbose) cout<<" -> Cost f'n: "<<fCost<<endl;
+        if(verbose) cout<<"  -> Cost f'n: "<<fCost<<endl;
     }
-    if(verbose) cout<<" ---> ending forward propagation..."<<endl;
+    if(verbose) cout<<"---> ending forward propagation..."<<endl;
 }
 
 double NeuralNetwork::CalculateCost() {
@@ -74,8 +74,14 @@ double NeuralNetwork::CalculateCost() {
 }
 
 void NeuralNetwork::BackwardPropagate(bool verbose) {
-    if(verbose) cout<<endl<<" ---> starting backward propagation..."<<endl;
+    // this backward propagation calculates the error matrix for each layer
+    // the calculation of the actual cost function derivatives from this 
+    // is done separately
     
+    if(verbose) cout<<endl<<"---> starting backward propagation..."<<endl;
+    fErrorMatrices.clear();
+    fErrorMatrices.resize(fMatrices.size());    
+
     // calculate error in output layer
     // delta^L = Hadamard( grad(cost(a^L)) , d(sigma)/d(z^L) )
     //  - L = output layer,
@@ -83,17 +89,59 @@ void NeuralNetwork::BackwardPropagate(bool verbose) {
     //  - z^L = weighted inout = m^L*a^{L-1} + b^L
     // gradient of cost f'n is w.r.t layer activation a^L,
     // for quadratic cost f'n, grad(cost(a^L)) = 2*(a^L - y)
-    Matrix * output_error = Utils::HadamardProduct( fCostDerivatives, OutputLayer()->ColumnVectorDerivative() );
+    fErrorMatrices.back() = Utils::HadamardProduct( fCostDerivatives, OutputLayer()->ColumnVectorDerivative() );
     if(verbose) {
+        cout<<endl<<" ---> OUTPUT LAYER "<<endl;
         cout<<" -> cost gradient:"<<endl;
         fCostDerivatives->Print();
         cout<<" -> output layer sigmoid derivatives:"<<endl;
         OutputLayer()->ColumnVectorDerivative()->Print();
         cout<<" -> Hadamard prod.:"<<endl;
-        output_error->Print();
+        fErrorMatrices.back()->Print();
     }
     
-    if(verbose) cout<<" ---> ending backward propagation..."<<endl;
+    // calculate the error for each layer before
+    // delta^{l} = Hadamard( w^{l+1} * delta^{l+1} , d(sigma)/d(z^l) )
+    //  - l = layer of interest
+    //  - w^l = weight matrix for layer l
+    for(int i=fTopology.size()-3; i>=0; i--) {
+        fErrorMatrices.at(i) = Utils::HadamardProduct( Utils::DotProduct( fMatrices.at(i+1)->Transpose(), fErrorMatrices.at(i+1) ) , fLayers.at(i+1)->ColumnVectorDerivative() );
+        if(verbose) {
+            cout<<endl<<" ---> LAYER "<<i<<endl;
+            cout<<" -> transpose matrix for layer "<<i+1<<":"<<endl;
+            fMatrices.at(i+1)->Transpose()->Print();
+            cout<<" -> error for layer "<<i+1<<":"<<endl;
+            fErrorMatrices.at(i+1)->Print();
+            cout<<" -> layer "<<i<<" sigmoid derivatives:"<<endl;
+            fLayers.at(i+1)->ColumnVectorDerivative()->Print();
+            cout<<" -> final Hadamard prod.:"<<endl;
+            fErrorMatrices.at(i)->Print();  
+        }
+    }
+
+    if(verbose) cout<<"---> ending backward propagation..."<<endl;
+}
+
+void NeuralNetwork::UpdateNetwork() {
+    // go through each weight and bias and update them based information 
+    // of the matrix errors calculated in BackwardPropagate
+    
+    for(int layer = 0; layer < fTopology.size()-2; layer++) {
+        for(int neuron = 0; neuron < fTopology.at(layer); neuron++) { 
+            double current_val, deriv;
+            // update the bias
+            current_val = fBiasMatrices.at(layer)->Element(neuron,0);
+            deriv = fErrorMatrices.at(layer)->Element(neuron,0);
+            fBiasMatrices.at(layer)->Element(neuron, 0, current_val - fLearningRate*deriv);
+
+            // update the weights
+            for(int weight = 0; weight < fTopology.at(layer); weight++) {
+                current_val = fMatrices.at(layer)->Element(neuron, weight);
+                deriv = fErrorMatrices.at(layer)->Element(neuron, 0) * fLayers.at(layer)->Neurons().at(neuron)->Activation();
+                fMatrices.at(layer)->Element(neuron, weight, current_val - fLearningRate*deriv);
+            }
+        }
+    } 
 }
 
 void NeuralNetwork::InputLayer(Layer * input) { 

@@ -8,6 +8,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
+# add library 
+#add_library(nn SHARED  ${sources})
+
 # add the executable
 add_executable(NeuralNetwork ${PROJECT_SOURCE_DIR}/main.cc ${sources} ${headers})
 
