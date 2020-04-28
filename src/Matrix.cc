@@ -22,6 +22,12 @@ void Matrix::Element(int row, int col, double value) {
 }
 
 double Matrix::Element(int row, int col) {
+    if(row < 0 || row >= nRows() || col < 0 || col >= nCols()) {
+        cerr<<"Attempted to access matrix element that is out of range!"<<endl;
+        cerr<<"Element: "<<row<<" x "<<col<<endl;
+        cerr<<"Matrix dims: "<<nRows()<<" x "<<nCols()<<endl;
+        assert(false);
+    }
     return fElements.at(row).at(col);
 }
 

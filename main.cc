@@ -42,6 +42,7 @@ int main(int argc, char * argv[])
     network->InputLayer(input);
     network->TargetLayer(input);
     network->ForwardPropagate(true);
+    network->BackwardPropagate(true);
 
     return 0;
 }

@@ -10,7 +10,7 @@ using namespace std;
 class Matrix
 {
   public:
-    Matrix(int rows, int cols, bool random=true);
+    Matrix(int rows, int cols, bool random=false);
 
     Matrix operator* (Matrix rhs);
     Matrix operator+ (Matrix rhs);

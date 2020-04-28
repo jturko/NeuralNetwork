@@ -44,6 +44,7 @@ class NeuralNetwork
     Layer * fTargetLayer;
     bool fTargetLayerSet;
     double fCost;
+    Matrix * fCostDerivatives;
 
 };
 

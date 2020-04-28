@@ -23,6 +23,9 @@ class Layer
     
     Matrix * ColumnVectorRaw();
     Matrix * RowVectorRaw();    
+    
+    Matrix * ColumnVectorDerivative();
+    Matrix * RowVectorDerivative();    
 
     void ActivationsRaw(Matrix * m);
     void ActivationRaw(int neuron, double value);

@@ -6,6 +6,7 @@
 
 NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType) {
     fTargetLayer = NULL;
+    fCostDerivatives = NULL;
     fTargetLayerSet = false;
     fTopology = topology;
     fNeuronType = neuronType;
@@ -17,9 +18,9 @@ void NeuralNetwork::BuildNetwork() {
     for(int i=0; i<nLayers()-1; i++) {
         Layer * l = new Layer(fTopology.at(i), fNeuronType);
         fLayers.push_back(l);
-        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i));
+        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i), true);
         fMatrices.push_back(m);
-        Matrix * bm = new Matrix(fTopology.at(i+1),1);
+        Matrix * bm = new Matrix(fTopology.at(i+1),1, true);
         fBiasMatrices.push_back(bm);
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
@@ -27,8 +28,10 @@ void NeuralNetwork::BuildNetwork() {
 }
 
 void NeuralNetwork::ForwardPropagate(bool verbose) {
+    if(verbose) cout<<endl<<" ---> starting forward propagation..."<<endl;
     for(int i=0; i<nLayers()-1; i++) {
-        fLayers.at(i+1)->ActivationsRaw(Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i)));
+        Matrix * weighted_input = Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i));
+        fLayers.at(i+1)->ActivationsRaw(weighted_input);
         if(verbose) {
             if(i==0) cout<<endl<<"----> Input Layer: "<<endl;
             else cout<<endl<<"----> Layer "<<i<<":"<<endl;
@@ -42,7 +45,7 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
             fBiasMatrices.at(i)->Print();
         }
     }
-    cout<<endl<<"----> Output Layer: "<<endl;
+    cout<<"----> Output Layer: "<<endl;
     if(verbose) { 
         cout<<" -> Raw values:"<<endl;
         OutputLayer()->ColumnVectorRaw()->Print();
@@ -55,8 +58,43 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
         CalculateCost();
         if(verbose) cout<<" -> Cost f'n: "<<fCost<<endl;
     }
+    if(verbose) cout<<" ---> ending forward propagation..."<<endl;
 }
 
+double NeuralNetwork::CalculateCost() {
+    fTargetLayerSet = false;
+    fCost = 0.;
+    if(fCostDerivatives) { delete fCostDerivatives; fCostDerivatives = NULL; }
+    fCostDerivatives = new Matrix(OutputLayer()->nNeurons(),1);
+    for(int i=0; i<fTopology.at(fLayers.size()-1); i++) { // quadratic cost
+        fCost += pow(TargetLayer()->Neurons().at(i)->Activation() - OutputLayer()->Neurons().at(i)->Activation(), 2.);
+        fCostDerivatives->Element(i, 0, 2.*(OutputLayer()->Neurons().at(i)->Activation() - TargetLayer()->Neurons().at(i)->Activation()) );
+    }
+    return fCost;
+}
+
+void NeuralNetwork::BackwardPropagate(bool verbose) {
+    if(verbose) cout<<endl<<" ---> starting backward propagation..."<<endl;
+    
+    // calculate error in output layer
+    // delta^L = Hadamard( grad(cost(a^L)) , d(sigma)/d(z^L) )
+    //  - L = output layer,
+    //  - sigma = sigmoid f'n, 
+    //  - z^L = weighted inout = m^L*a^{L-1} + b^L
+    // gradient of cost f'n is w.r.t layer activation a^L,
+    // for quadratic cost f'n, grad(cost(a^L)) = 2*(a^L - y)
+    Matrix * output_error = Utils::HadamardProduct( fCostDerivatives, OutputLayer()->ColumnVectorDerivative() );
+    if(verbose) {
+        cout<<" -> cost gradient:"<<endl;
+        fCostDerivatives->Print();
+        cout<<" -> output layer sigmoid derivatives:"<<endl;
+        OutputLayer()->ColumnVectorDerivative()->Print();
+        cout<<" -> Hadamard prod.:"<<endl;
+        output_error->Print();
+    }
+    
+    if(verbose) cout<<" ---> ending backward propagation..."<<endl;
+}
 
 void NeuralNetwork::InputLayer(Layer * input) { 
     if(input->nNeurons() != fTopology.at(0)) {
@@ -133,15 +171,6 @@ void NeuralNetwork::TargetLayer(vector<double> values) {
         fTargetLayer->ActivationRaw(i, values.at(i));
     }    
     fTargetLayerSet = true;
-}
-
-double NeuralNetwork::CalculateCost() {
-    fTargetLayerSet = false;
-    fCost = 0.;
-    for(int i=0; i<fTopology.at(fLayers.size()-1); i++) { // quadratic cost
-        fCost += pow(TargetLayer()->Neurons().at(i)->Activation() - OutputLayer()->Neurons().at(i)->Activation(), 2.);
-    }
-    return fCost;
 }
 
 

@@ -47,6 +47,20 @@ Matrix * Layer::ColumnVectorRaw() {
     return m;
 }
 
+Matrix * Layer::RowVectorDerivative() {
+    Matrix * m = new Matrix(1, fnNeurons);
+    for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->ActivationDerivative());
+
+    return m;
+}
+
+Matrix * Layer::ColumnVectorDerivative() {
+    Matrix * m = new Matrix(fnNeurons, 1);
+    for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->ActivationDerivative());
+
+    return m;
+}
+
 void Layer::ActivationRaw(int neuron, double value) {
     fNeurons.at(neuron)->ActivationRaw(value);
 }
