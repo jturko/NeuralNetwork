@@ -51,15 +51,16 @@ void Layer::ActivationRaw(int neuron, double value) {
     fNeurons.at(neuron)->ActivationRaw(value);
 }
 
-void Layer::ActivationsRaw(Matrix m) {
-    if(m.nRows() != 1 || m.nCols() != fnNeurons) {
+void Layer::ActivationsRaw(Matrix * m) {
+    if(m->nRows() != fnNeurons || m->nCols() != 1) {
         cerr<<"Wrong dimensions for input matrix, cannot set as layer activations"<<endl;
+        cerr<<"With the current setup, this needs to be a column vector with "<<fnNeurons<<" elements"<<endl;
         assert(false);
         return;
     }
     
     for(int i=0; i<fnNeurons; i++) {
-        fNeurons.at(i)->ActivationRaw(m.Element(0,i));
+        fNeurons.at(i)->ActivationRaw(m->Element(i,0));
     }
 }   
 

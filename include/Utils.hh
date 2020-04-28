@@ -8,6 +8,8 @@
 #include <string>
 #include <random>
 
+#include "Matrix.hh"
+
 using namespace std;
     
 namespace Utils {
@@ -43,22 +45,82 @@ namespace Utils {
         }
     }
 
-    inline Matrix HadamardProduct(Matrix m1, Matrix m2) {
-        if(m1.nRows() != m2.nRows() || m1.nCols() != m2.nCols()) {
-            cerr<<"Wrong dimensions for Hadamard product - m1: "<<m1.nRows()<<"x"<<m1.nCols()<<endl;
-            cerr<<"                                        m2: "<<m2.nRows()<<"x"<<m2.nCols()<<endl;
+    inline Matrix * HadamardProduct(Matrix * m1, Matrix * m2) {
+        if(m1->nRows() != m2->nRows() || m1->nCols() != m2->nCols()) {
+            cerr<<"Wrong dimensions for Hadamard product - m1: "<<m1->nRows()<<"x"<<m1->nCols()<<endl;
+            cerr<<"                                        m2: "<<m2->nRows()<<"x"<<m2->nCols()<<endl;
             assert(false);
-            return Matrix(0,0);
+            return NULL;
         }    
-        Matrix m3(m1.nRows(), m1.nCols());
-        for(int i=0; i<m1.nRows(); i++) {
-            for(int j=0; j<m1.nCols(); j++) {
-                m3.Element(i,j,m1.Element(i,j)+m2.Element(i,j));
+        
+        Matrix * m = new Matrix(m1->nRows(), m1->nCols());
+        for(int i=0; i<m1->nRows(); i++) {
+            for(int j=0; j<m1->nCols(); j++) {
+                m->Element(i,j,m1->Element(i,j)+m2->Element(i,j));
             }
         }
-        return m3;
+        
+        return m;
     }
     
+    inline Matrix * DotProduct(Matrix * m1, Matrix * m2) {
+        if(m1->nCols() != m2->nRows()) {
+            cerr<<"incorrect matrix dims: lhs: "<<m1->nRows()<<" x "<<m1->nCols()<<endl;
+            cerr<<"                       rhs: "<<m2->nRows()<<" x "<<m2->nCols()<<endl;
+            assert(false);
+            return NULL;
+        }
+
+        Matrix * m = new Matrix(m1->nRows(),m2->nCols());
+        for(int i=0; i<m1->nRows(); i++) {
+            for(int j=0; j<m2->nCols(); j++) {
+                double tmpElement = 0.0;
+                for(int k=0; k<m1->nCols(); k++) tmpElement += m1->Element(i,k)*m2->Element(k,j);
+                m->Element(i,j,tmpElement);
+            }
+        }
+        
+        return m;
+    }
+
+    inline Matrix * MatrixAdd(Matrix * m1, Matrix * m2) {
+        if(m1->nCols() != m2->nCols() || m1->nRows() != m2->nRows()) {
+            cerr<<"incorrect matrix dims: lhs: "<<m1->nRows()<<" x "<<m1->nCols()<<endl;
+            cerr<<"                       rhs: "<<m2->nRows()<<" x "<<m2->nCols()<<endl;
+            assert(false);
+            return NULL;
+        }
+
+        Matrix * m = new Matrix(m1->nRows(),m1->nCols());
+        for(int i=0; i<m1->nRows(); i++) {
+            for(int j=0; j<m1->nCols(); j++) {
+                m->Element(i,j,m1->Element(i,j)+m2->Element(i,j));
+            }
+        }
+
+        return m;
+        
+    }
+    
+    inline Matrix * MatrixSubtract(Matrix * m1, Matrix * m2) {
+        if(m1->nCols() != m2->nCols() || m1->nRows() != m2->nRows()) {
+            cerr<<"incorrect matrix dims: lhs: "<<m1->nRows()<<" x "<<m1->nCols()<<endl;
+            cerr<<"                       rhs: "<<m2->nRows()<<" x "<<m2->nCols()<<endl;
+            assert(false);
+            return NULL;
+        }
+
+        Matrix * m = new Matrix(m1->nRows(),m1->nCols());
+        for(int i=0; i<m1->nRows(); i++) {
+            for(int j=0; j<m1->nCols(); j++) {
+                m->Element(i,j,m1->Element(i,j)-m2->Element(i,j));
+            }
+        }
+
+        return m;
+        
+    }
+
     // code for reading MNIST data taken from: 
     // https://stackoverflow.com/questions/8286668/how-to-read-mnist-data-in-c
     inline int reverseInt (int i) {

@@ -1,6 +1,7 @@
 
 #include <cmath>
 
+#include "Utils.hh"
 #include "NeuralNetwork.hh"
 
 NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType) {
@@ -16,9 +17,9 @@ void NeuralNetwork::BuildNetwork() {
     for(int i=0; i<nLayers()-1; i++) {
         Layer * l = new Layer(fTopology.at(i), fNeuronType);
         fLayers.push_back(l);
-        Matrix * m = new Matrix(fTopology.at(i),fTopology.at(i+1));
+        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i));
         fMatrices.push_back(m);
-        Matrix * bm = new Matrix(1,fTopology.at(i+1));
+        Matrix * bm = new Matrix(fTopology.at(i+1),1);
         fBiasMatrices.push_back(bm);
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
@@ -27,14 +28,14 @@ void NeuralNetwork::BuildNetwork() {
 
 void NeuralNetwork::ForwardPropagate(bool verbose) {
     for(int i=0; i<nLayers()-1; i++) {
-        fLayers.at(i+1)->ActivationsRaw(((*fLayers.at(i)->RowVector())*(*fMatrices.at(i)))+(*fBiasMatrices.at(i)));
+        fLayers.at(i+1)->ActivationsRaw(Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i)));
         if(verbose) {
-            if(i==0) cout<<endl<<"----> First Layer: "<<endl;
+            if(i==0) cout<<endl<<"----> Input Layer: "<<endl;
             else cout<<endl<<"----> Layer "<<i<<":"<<endl;
             cout<<" -> Raw values:"<<endl;
-            fLayers.at(i)->RowVectorRaw()->Print();
+            fLayers.at(i)->ColumnVectorRaw()->Print();
             cout<<" -> Activated values:"<<endl;
-            fLayers.at(i)->RowVector()->Print();
+            fLayers.at(i)->ColumnVector()->Print();
             cout<<" -> Matrix from layer "<<i<<" -> "<<i+1<<endl;
             fMatrices.at(i)->Print();
             cout<<" -> Bias matrix from layer "<<i<<" -> "<<i+1<<endl;
@@ -44,9 +45,9 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
     cout<<endl<<"----> Output Layer: "<<endl;
     if(verbose) { 
         cout<<" -> Raw values:"<<endl;
-        OutputLayer()->RowVectorRaw()->Print();
+        OutputLayer()->ColumnVectorRaw()->Print();
         cout<<" -> Activated values:"<<endl;
-        OutputLayer()->RowVector()->Print();
+        OutputLayer()->ColumnVector()->Print();
     }
    
     // if target output set, calculate cost

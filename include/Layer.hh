@@ -24,7 +24,7 @@ class Layer
     Matrix * ColumnVectorRaw();
     Matrix * RowVectorRaw();    
 
-    void ActivationsRaw(Matrix m);
+    void ActivationsRaw(Matrix * m);
     void ActivationRaw(int neuron, double value);
 
     double ActivationRaw(int neuron) { return fNeurons.at(neuron)->ActivationRaw(); }
