@@ -12,8 +12,8 @@ class Neuron
     Neuron();
     Neuron(double activation);
     
-    double ActivationRaw() { return fActivationRaw; } 
-    void ActivationRaw(double activation) { fActivationRaw = activation; }
+    double WeightedInput() { return fWeightedInput; } 
+    void WeightedInput(double activation) { fWeightedInput = activation; }
     
     virtual double Activation() = 0; 
     virtual double ActivationDerivative() = 0;
@@ -21,7 +21,7 @@ class Neuron
     void Print();
 
   protected:
-    double fActivationRaw;
+    double fWeightedInput;
 };
 
 #endif

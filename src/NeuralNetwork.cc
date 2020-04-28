@@ -31,7 +31,7 @@ void NeuralNetwork::ForwardPropagate(bool verbose) {
     if(verbose) cout<<endl<<" ---> starting forward propagation..."<<endl;
     for(int i=0; i<nLayers()-1; i++) {
         Matrix * weighted_input = Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i));
-        fLayers.at(i+1)->ActivationsRaw(weighted_input);
+        fLayers.at(i+1)->WeightedInputs(weighted_input);
         if(verbose) {
             if(i==0) cout<<endl<<"----> Input Layer: "<<endl;
             else cout<<endl<<"----> Layer "<<i<<":"<<endl;
@@ -117,7 +117,7 @@ void NeuralNetwork::InputLayer(vector<double> values) {
         return;
     }
     for(int i=0; i<fTopology.at(0); i++) {
-        fLayers.at(0)->ActivationRaw(i, values.at(i));
+        fLayers.at(0)->WeightedInput(i, values.at(i));
     }    
 }
 
@@ -142,7 +142,7 @@ void NeuralNetwork::OutputLayer(vector<double> values) {
         return;
     }
     for(int i=0; i<fTopology.at(0); i++) {
-        fLayers.at(fLayers.size()-1)->ActivationRaw(i, values.at(i));
+        fLayers.at(fLayers.size()-1)->WeightedInput(i, values.at(i));
     }    
 }
 
@@ -168,7 +168,7 @@ void NeuralNetwork::TargetLayer(vector<double> values) {
         return;
     }
     for(int i=0; i<fTopology.at(0); i++) {
-        fTargetLayer->ActivationRaw(i, values.at(i));
+        fTargetLayer->WeightedInput(i, values.at(i));
     }    
     fTargetLayerSet = true;
 }

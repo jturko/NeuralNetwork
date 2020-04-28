@@ -35,14 +35,14 @@ Matrix * Layer::ColumnVector() {
 
 Matrix * Layer::RowVectorRaw() {
     Matrix * m = new Matrix(1, fnNeurons);
-    for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->ActivationRaw());
+    for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->WeightedInput());
 
     return m;
 }
 
 Matrix * Layer::ColumnVectorRaw() {
     Matrix * m = new Matrix(fnNeurons, 1);
-    for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->ActivationRaw());
+    for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->WeightedInput());
 
     return m;
 }
@@ -61,11 +61,11 @@ Matrix * Layer::ColumnVectorDerivative() {
     return m;
 }
 
-void Layer::ActivationRaw(int neuron, double value) {
-    fNeurons.at(neuron)->ActivationRaw(value);
+void Layer::WeightedInput(int neuron, double value) {
+    fNeurons.at(neuron)->WeightedInput(value);
 }
 
-void Layer::ActivationsRaw(Matrix * m) {
+void Layer::WeightedInputs(Matrix * m) {
     if(m->nRows() != fnNeurons || m->nCols() != 1) {
         cerr<<"Wrong dimensions for input matrix, cannot set as layer activations"<<endl;
         cerr<<"With the current setup, this needs to be a column vector with "<<fnNeurons<<" elements"<<endl;
@@ -74,7 +74,7 @@ void Layer::ActivationsRaw(Matrix * m) {
     }
     
     for(int i=0; i<fnNeurons; i++) {
-        fNeurons.at(i)->ActivationRaw(m->Element(i,0));
+        fNeurons.at(i)->WeightedInput(m->Element(i,0));
     }
 }   
 
@@ -84,9 +84,9 @@ vector<double> Layer::Activations() {
     return output;
 }
 
-vector<double> Layer::ActivationsRaw() {
+vector<double> Layer::WeightedInputs() {
     vector<double> output;
-    for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->ActivationRaw());
+    for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->WeightedInput());
     return output;
 }
 

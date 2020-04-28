@@ -27,15 +27,15 @@ class Layer
     Matrix * ColumnVectorDerivative();
     Matrix * RowVectorDerivative();    
 
-    void ActivationsRaw(Matrix * m);
-    void ActivationRaw(int neuron, double value);
+    void WeightedInputs(Matrix * m);
+    void WeightedInput(int neuron, double value);
 
-    double ActivationRaw(int neuron) { return fNeurons.at(neuron)->ActivationRaw(); }
+    double WeightedInput(int neuron) { return fNeurons.at(neuron)->WeightedInput(); }
 
     string NeuronType() { return fNeuronType; }
 
     vector<double> Activations();
-    vector<double> ActivationsRaw();
+    vector<double> WeightedInputs();
     
   private:
     string fNeuronType;
