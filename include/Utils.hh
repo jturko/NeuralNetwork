@@ -56,7 +56,7 @@ namespace Utils {
         Matrix * m = new Matrix(m1->nRows(), m1->nCols());
         for(int i=0; i<m1->nRows(); i++) {
             for(int j=0; j<m1->nCols(); j++) {
-                m->Element(i,j,m1->Element(i,j)+m2->Element(i,j));
+                m->Element(i,j,m1->Element(i,j)*m2->Element(i,j));
             }
         }
         
