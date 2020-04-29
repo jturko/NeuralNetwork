@@ -78,6 +78,19 @@ void Layer::WeightedInputs(Matrix * m) {
     }
 }   
 
+void Layer::WeightedInputs(vector<double> vals) {
+    if(vals.size() != fnNeurons) {
+        cerr<<"Wrong dimensions for input vector<double>, cannot set as layer activations"<<endl;
+        cerr<<"With the current setup, this needs to be vector<double> with "<<fnNeurons<<" elements"<<endl;
+        assert(false);
+        return;
+    }
+    
+    for(int i=0; i<fnNeurons; i++) {
+        fNeurons.at(i)->WeightedInput(vals.at(i));
+    }
+}   
+
 vector<double> Layer::Activations() {
     vector<double> output;
     for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->Activation());

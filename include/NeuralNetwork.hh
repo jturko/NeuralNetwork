@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 #include "Layer.hh"
 
@@ -12,10 +13,13 @@ class NeuralNetwork
     NeuralNetwork(vector<int> topology, string neuronType);
     
     void BuildNetwork();
-    void ForwardPropagate(bool verbose=false);
+    
+    void ForwardPropagate();
+    void BackwardPropagate();
     double CalculateCost();
-    void BackwardPropagate(bool verbose=false);
+    void AddToGradient();
     void UpdateNetwork();
+    void SGD( vector <pair <vector<double>,vector<double> > > training_data, int batch_size, double learning_rate = 0.1); // stochastic gradient decent
 
     vector<int> Topology() { return fTopology; }
     int nLayers() { return fTopology.size(); }
@@ -41,6 +45,8 @@ class NeuralNetwork
     vector<Matrix *> BiasMatrices() { return fBiasMatrices; }
     vector<Matrix *> ErrorMatrices() { return fErrorMatrices; }
 
+    void Verbose(bool val) { fVerbose = val; }
+
   private:
     string fNeuronType;
     vector<int> fTopology;
@@ -49,12 +55,18 @@ class NeuralNetwork
     vector<Matrix *> fBiasMatrices; 
     vector<Matrix *> fErrorMatrices; 
 
+    vector<Matrix *> fGradientMatrices;
+    vector<Matrix *> fBiasGradientMatrices;
+
     Layer * fTargetLayer;
     bool fTargetLayerSet;
     double fCost;
     Matrix * fCostDerivatives;
 
     double fLearningRate;
+    int fBatchSize;
+
+    bool fVerbose;
 
 };
 

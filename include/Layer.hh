@@ -27,6 +27,7 @@ class Layer
     Matrix * ColumnVectorDerivative();
     Matrix * RowVectorDerivative();    
 
+    void WeightedInputs(vector<double> vals);
     void WeightedInputs(Matrix * m);
     void WeightedInput(int neuron, double value);
 
