@@ -100,7 +100,7 @@ void NeuralNetwork::BackwardPropagate() {
         fCostDerivatives->Print();
         cout<<" -> output layer sigmoid derivatives:"<<endl;
         OutputLayer()->ColumnVectorDerivative()->Print();
-        cout<<" -> Hadamard prod.:"<<endl;
+        cout<<" -> output layer error matrix:"<<endl;
         fErrorMatrices.back()->Print();
     }
     
@@ -118,7 +118,7 @@ void NeuralNetwork::BackwardPropagate() {
             fErrorMatrices.at(i+1)->Print();
             cout<<" -> layer "<<i<<" sigmoid derivatives:"<<endl;
             fLayers.at(i+1)->ColumnVectorDerivative()->Print();
-            cout<<" -> final Hadamard prod.:"<<endl;
+            cout<<" -> layer "<<i<<" error matrix:"<<endl;
             fErrorMatrices.at(i)->Print();  
         }
     }
@@ -138,26 +138,27 @@ void NeuralNetwork::AddToGradient() {
         }
     }
 
+    double current_val, update;
     for(int layer = 0; layer < fTopology.size()-1; layer++) {
-        for(int neuron = 0; neuron < fTopology.at(layer); neuron++) { 
-            double current_val, update;
-            // update the bias grads
+        // update the bias grads.
+        for(int neuron = 0; neuron < fTopology.at(layer+1); neuron++) {
             current_val = fBiasGradientMatrices.at(layer)->Element(neuron,0);
             update = fErrorMatrices.at(layer)->Element(neuron,0);           
-            if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", bias, current_val: "<<current_val<<", update: "<<update;
+            if(fVerbose) cout<<" -> layer: "<<layer<<", bias to neuron: "<<neuron<<" in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
             fBiasGradientMatrices.at(layer)->Element(neuron, 0, current_val + update);
             if(fVerbose) cout<<", new bias matrix grad.: "<<fBiasGradientMatrices.at(layer)->Element(neuron, 0)<<endl;
-
-            // update the weight grads
-            for(int weight = 0; weight < fTopology.at(layer); weight++) {
-                current_val = fGradientMatrices.at(layer)->Element(neuron, weight);
-                update = fErrorMatrices.at(layer)->Element(neuron, 0) * fLayers.at(layer)->Neurons().at(weight)->Activation();
-                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight: "<<weight<<", current_val: "<<current_val<<", update: "<<update;
-                fGradientMatrices.at(layer)->Element(neuron, weight, current_val + update);
-                if(fVerbose) cout<<", new matrix grad.: "<<fGradientMatrices.at(layer)->Element(neuron, weight)<<endl;
+        }
+        // update the matrix grads.
+        for(int neuron = 0; neuron < fTopology.at(layer); neuron++) { 
+            for(int weight = 0; weight < fTopology.at(layer+1); weight++) {
+                current_val = fGradientMatrices.at(layer)->Element(weight, neuron);
+                update = fErrorMatrices.at(layer)->Element(weight, 0) * fLayers.at(layer)->Neurons().at(neuron)->Activation();
+                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer:"<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
+                fGradientMatrices.at(layer)->Element(weight, neuron, current_val + update);
+                if(fVerbose) cout<<", new matrix grad.: "<<fGradientMatrices.at(layer)->Element(weight, neuron)<<endl;
             }
         }
-    } 
+    }
 }
 
 void NeuralNetwork::UpdateNetwork() {
@@ -165,28 +166,28 @@ void NeuralNetwork::UpdateNetwork() {
     // then we update the weight matrices and biases accordingly
     
     if(fVerbose) cout<<" ---> updating the network..."<<endl;
-
+    
+    double current_val, update;
     for(int layer = 0; layer < fTopology.size()-1; layer++) {
-        for(int neuron = 0; neuron < fTopology.at(layer); neuron++) { 
-            double current_val, update;
-            
-            // update the biases
+        // update the biases
+        for(int neuron = 0; neuron < fTopology.at(layer+1); neuron++) {
             current_val = fBiasMatrices.at(layer)->Element(neuron, 0);
             update = fLearningRate * fBiasGradientMatrices.at(layer)->Element(neuron, 0) / double(fBatchSize);
-            if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", bias, current_val: "<<current_val<<", update: "<<update;
+            if(fVerbose) cout<<" -> layer: "<<layer<<", bias to neuron: "<<neuron<<" in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
             fBiasMatrices.at(layer)->Element(neuron, 0, current_val - update);
-            if(fVerbose) cout<<", new bias matrix element: "<<fBiasMatrices.at(layer)->Element(neuron, 0)<<endl;
-
-            // update the weights
-            for(int weight = 0; weight < fTopology.at(layer); weight++) {
-                current_val = fMatrices.at(layer)->Element(neuron, weight);
-                update = fLearningRate * fGradientMatrices.at(layer)->Element(neuron, weight) / double(fBatchSize);
-                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight: "<<weight<<", current_val: "<<current_val<<", update: "<<update;
-                fMatrices.at(layer)->Element(neuron, weight, current_val - update);
-                if(fVerbose) cout<<", new matrix element: "<<fMatrices.at(layer)->Element(neuron, weight)<<endl;
+            if(fVerbose) cout<<", new bias matrix element: "<<fBiasGradientMatrices.at(layer)->Element(neuron, 0)<<endl;
+        }
+        // update the matrices
+        for(int neuron = 0; neuron < fTopology.at(layer); neuron++) { 
+            for(int weight = 0; weight < fTopology.at(layer+1); weight++) {
+                current_val = fMatrices.at(layer)->Element(weight, neuron);
+                update = fLearningRate * fGradientMatrices.at(layer)->Element(weight, neuron) / double(fBatchSize);
+                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer:"<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
+                fMatrices.at(layer)->Element(weight, neuron, current_val - update);
+                if(fVerbose) cout<<", new matrix element: "<<fGradientMatrices.at(layer)->Element(weight, neuron)<<endl;
             }
         }
-    } 
+    }
     
     fGradientMatrices.clear();
     fBiasGradientMatrices.clear();
