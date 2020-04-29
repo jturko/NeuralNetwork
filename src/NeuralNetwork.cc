@@ -11,7 +11,7 @@ NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType, bool print
     
     fVerbose = false;
     fBatchSize = 1;
-    fLearningRate = 0.1; // small arbitrary value
+    fLearningRate = 0.02; // small arbitrary value
     fTargetLayer = NULL;
     fCostDerivatives = NULL;
     fTargetLayerSet = false;
@@ -78,10 +78,6 @@ double NeuralNetwork::CalculateCost() {
     for(int i=0; i<fTopology.at(fLayers.size()-1); i++) { // quadratic cost
         fCost += pow(TargetLayer()->Neurons().at(i)->Activation() - OutputLayer()->Neurons().at(i)->Activation(), 2.);
         fCostDerivatives->Element(i, 0, 2.*(OutputLayer()->Neurons().at(i)->Activation() - TargetLayer()->Neurons().at(i)->Activation()) );
-    }
-
-    if(fPrintErrors) {
-        fErrorsFile<<fCost<<endl;
     }
     
     return fCost;
@@ -218,19 +214,28 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
 
     int n_batches = training_data.size()/fBatchSize;
     pair< vector<double>,vector<double> > current_example;    
-    Layer *input, *output;
 
-    for(int batch=0; batch<n_batches; batch++) {
+    for(int batch = 0; batch < n_batches; batch++) {
         fGradientMatrices.clear();
         fBiasGradientMatrices.clear();
-        for(int layer=0; layer<nLayers(); layer++) {
+        for(int layer = 0; layer < nLayers()-1; layer++) {
             fGradientMatrices.push_back(new Matrix(fTopology.at(layer+1), fTopology.at(layer)));
             fBiasGradientMatrices.push_back(new Matrix(fTopology.at(layer+1), 1));
         }
 
-        for(int example=0; example<batch_size; example++) {
-            current_example = training_data.at(batch+example);
-            
+        for(int example = 0; example < batch_size; example++) {
+            int num = batch * fBatchSize + example;
+            current_example = training_data.at(num);
+            if(fVerbose) {
+                cout<<" -> current example: ";
+                cout<<" -> input: ";
+                for(int i = 0; i < fTopology.front(); i++) cout<<training_data.at(num).first.at(i)<<", ";
+                cout<<endl;
+                cout<<" -> output: ";
+                for(int i = 0; i < fTopology.back(); i++) cout<<training_data.at(num).second.at(i)<<", ";
+                cout<<endl;
+            }            
+
             // check that both elements of the pair have the correct number of neurons
             if(current_example.first.size()  != InputLayer()->nNeurons() || 
                current_example.second.size() != OutputLayer()->nNeurons() ) {
@@ -242,18 +247,21 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
 
             // calculate gradient for the current example
             this->InputLayer(current_example.first);
-            this->TargetLayer(current_example.second);
+            this->TargetLayer(current_example.second); // this is causing error 
             this->ForwardPropagate();
             this->BackwardPropagate();
             this->AddToGradient();
 
-            // backward propagate calculates all the errors for us, but the 
-            // gradients for the example are calculated in UpdateNetwork()
         }
             
         // now that the gradients hav been calculated, we update the network with the
         // calculated gradient averaged over the batch size
         this->UpdateNetwork();
+
+        // we will print the error of this most recent example
+        if(fPrintErrors) {
+            fErrorsFile<<fCost<<endl;
+        }
     }
 
 }
@@ -319,6 +327,10 @@ void NeuralNetwork::TargetLayer(Layer * target) {
         assert(false);
         return;
     }
+    if(fTargetLayer) {
+        delete fTargetLayer;
+        fTargetLayer = NULL;
+    }
     fTargetLayer = target; 
     fTargetLayerSet = true;
 }
@@ -329,10 +341,23 @@ void NeuralNetwork::TargetLayer(vector<double> values) {
         assert(false);
         return;
     }
+    if(!fTargetLayer) {
+        fTargetLayer = new Layer(fTopology.back(), fNeuronType);
+    }
     for(int i=0; i<fTopology.at(0); i++) {
         fTargetLayer->WeightedInput(i, values.at(i));
     }    
     fTargetLayerSet = true;
+}
+
+void NeuralNetwork::Print() {
+    for(int layer = 0; layer < nLayers()-1; layer++) {
+        cout<<" --- LAYER "<<layer<<" MATRICES ---"<<endl;
+        cout<<" WEIGHT MATRIX:"<<endl;
+        fMatrices.at(layer)->Print();
+        cout<<" BIAS MATRIX:"<<endl;
+        fBiasMatrices.at(layer)->Print();
+    }   
 }
 
 

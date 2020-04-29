@@ -21,7 +21,7 @@ class NeuralNetwork
     double CalculateCost();
     void AddToGradient();
     void UpdateNetwork();
-    void SGD( vector <pair <vector<double>,vector<double> > > training_data, int batch_size, double learning_rate = 0.1); // stochastic gradient decent
+    void SGD( vector <pair <vector<double>,vector<double> > > training_data, int batch_size, double learning_rate = 0.05); // stochastic gradient decent
 
     vector<int> Topology() { return fTopology; }
     int nLayers() { return fTopology.size(); }
@@ -49,6 +49,8 @@ class NeuralNetwork
 
     void Verbose(bool val) { fVerbose = val; }
     void PrintErrors(bool val) { fPrintErrors = val; }
+
+    void Print();
 
   private:
     string fNeuronType;
