@@ -4,9 +4,10 @@
 #include "Utils.hh"
 #include "NeuralNetwork.hh"
 
-NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType) {
+NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType, bool print_errors) {
     fTopology = topology;
     fNeuronType = neuronType;
+    fPrintErrors = print_errors;
     
     fVerbose = false;
     fBatchSize = 1;
@@ -30,6 +31,10 @@ void NeuralNetwork::BuildNetwork() {
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
     fLayers.push_back(l);
+
+    if(fPrintErrors) {
+        fErrorsFile.open("errors.txt");
+    }
 }
 
 void NeuralNetwork::ForwardPropagate() {
@@ -74,6 +79,11 @@ double NeuralNetwork::CalculateCost() {
         fCost += pow(TargetLayer()->Neurons().at(i)->Activation() - OutputLayer()->Neurons().at(i)->Activation(), 2.);
         fCostDerivatives->Element(i, 0, 2.*(OutputLayer()->Neurons().at(i)->Activation() - TargetLayer()->Neurons().at(i)->Activation()) );
     }
+
+    if(fPrintErrors) {
+        fErrorsFile<<fCost<<endl;
+    }
+    
     return fCost;
 }
 

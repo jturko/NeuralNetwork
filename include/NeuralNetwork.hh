@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <iostream>
+#include <fstream>
 
 #include "Layer.hh"
 
@@ -10,7 +12,7 @@ using namespace std;
 class NeuralNetwork 
 {
   public:
-    NeuralNetwork(vector<int> topology, string neuronType);
+    NeuralNetwork(vector<int> topology, string neuronType, bool print_errors = true);
     
     void BuildNetwork();
     
@@ -46,11 +48,13 @@ class NeuralNetwork
     vector<Matrix *> ErrorMatrices() { return fErrorMatrices; }
 
     void Verbose(bool val) { fVerbose = val; }
+    void PrintErrors(bool val) { fPrintErrors = val; }
 
   private:
     string fNeuronType;
     vector<int> fTopology;
     vector<Layer *> fLayers;
+    
     vector<Matrix *> fMatrices; 
     vector<Matrix *> fBiasMatrices; 
     vector<Matrix *> fErrorMatrices; 
@@ -67,6 +71,8 @@ class NeuralNetwork
     int fBatchSize;
 
     bool fVerbose;
+    bool fPrintErrors;
+    ofstream fErrorsFile;
 
 };
 
