@@ -39,6 +39,7 @@ int main(int argc, char * argv[])
     int total_examples = n_epochs * batch_size;
 
     // create random training data
+    cout<<" --> generating training data ..."<<flush;
     vector< pair< vector<double>, vector<double> > > training_data;
     for(int epoch = 0; epoch < n_epochs; epoch++) {
         for(int example = 0; example < batch_size; example++) {
@@ -50,6 +51,7 @@ int main(int argc, char * argv[])
             training_data.push_back(make_pair(data, data));
         }   
     }    
+    cout<<" done!"<<endl;
 
     // train the network using SGD
     network->SGD(training_data, batch_size, learning_rate);

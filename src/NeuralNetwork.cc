@@ -40,7 +40,12 @@ void NeuralNetwork::BuildNetwork() {
 void NeuralNetwork::ForwardPropagate() {
     if(fVerbose) cout<<endl<<" ---> starting forward propagation..."<<endl;
     for(int i=0; i<nLayers()-1; i++) {
-        Matrix * weighted_input = Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i));
+        Matrix * a = fMatrices.at(i);
+        Matrix * b = fLayers.at(i)->ColumnVector();
+        Matrix * c = Utils::DotProduct(a,b);
+        Matrix * d = fBiasMatrices.at(i);
+        Matrix * weighted_input = Utils::MatrixAdd(c,d);
+        //Matrix * weighted_input = Utils::MatrixAdd(Utils::DotProduct(fMatrices.at(i), fLayers.at(i)->ColumnVector()), fBiasMatrices.at(i));
         fLayers.at(i+1)->WeightedInputs(weighted_input);
         if(fVerbose) {
             if(i==0) cout<<endl<<" ---> INPUT LAYER: "<<endl;
@@ -54,6 +59,9 @@ void NeuralNetwork::ForwardPropagate() {
             cout<<"  -> Bias matrix from layer "<<i<<" -> "<<i+1<<endl;
             fBiasMatrices.at(i)->Print();
         }
+        delete b; b = NULL;
+        delete c; c = NULL;
+        delete weighted_input; weighted_input = NULL;
     }
     if(fVerbose) { 
         cout<<endl<<" ---> OUTPUT LAYER: "<<endl;
@@ -89,6 +97,7 @@ void NeuralNetwork::BackwardPropagate() {
     // is done separately
     
     if(fVerbose) cout<<endl<<"---> starting backward propagation..."<<endl;
+    for(auto m : fErrorMatrices) delete m;
     fErrorMatrices.clear();
     fErrorMatrices.resize(fMatrices.size());    
 
@@ -99,7 +108,11 @@ void NeuralNetwork::BackwardPropagate() {
     //  - z^L = weighted inout = m^L*a^{L-1} + b^L
     // gradient of cost f'n is w.r.t layer activation a^L,
     // for quadratic cost f'n, grad(cost(a^L)) = 2*(a^L - y)
-    fErrorMatrices.back() = Utils::HadamardProduct( fCostDerivatives, OutputLayer()->ColumnVectorDerivative() );
+    Matrix * a = fCostDerivatives;
+    Matrix * b = OutputLayer()->ColumnVectorDerivative();
+    fErrorMatrices.back() = Utils::HadamardProduct(a,b);
+    delete b; b = NULL;
+    //fErrorMatrices.back() = Utils::HadamardProduct( fCostDerivatives, OutputLayer()->ColumnVectorDerivative() );
     if(fVerbose) {
         cout<<endl<<" ---> OUTPUT LAYER "<<endl;
         cout<<" -> cost gradient:"<<endl;
@@ -115,7 +128,12 @@ void NeuralNetwork::BackwardPropagate() {
     //  - l = layer of interest
     //  - w^l = weight matrix for layer l
     for(int i=fTopology.size()-3; i>=0; i--) {
-        fErrorMatrices.at(i) = Utils::HadamardProduct( Utils::DotProduct( fMatrices.at(i+1)->Transpose(), fErrorMatrices.at(i+1) ) , fLayers.at(i+1)->ColumnVectorDerivative() );
+        a = fMatrices.at(i+1)->Transpose();
+        b = fErrorMatrices.at(i+1);
+        Matrix * c = Utils::DotProduct(a,b);
+        Matrix * d = fLayers.at(i+1)->ColumnVectorDerivative();
+        fErrorMatrices.at(i) = Utils::HadamardProduct(c,d);
+        //fErrorMatrices.at(i) = Utils::HadamardProduct( Utils::DotProduct( fMatrices.at(i+1)->Transpose(), fErrorMatrices.at(i+1) ) , fLayers.at(i+1)->ColumnVectorDerivative() );
         if(fVerbose) {
             cout<<endl<<" ---> LAYER "<<i<<endl;
             cout<<" -> transpose matrix for layer "<<i+1<<":"<<endl;
@@ -127,6 +145,9 @@ void NeuralNetwork::BackwardPropagate() {
             cout<<" -> layer "<<i<<" error matrix:"<<endl;
             fErrorMatrices.at(i)->Print();  
         }
+        delete a; a = NULL;
+        delete c; c = NULL;
+        delete d; d = NULL;
     }
 
     if(fVerbose) cout<<"---> ending backward propagation..."<<endl;
@@ -195,6 +216,8 @@ void NeuralNetwork::UpdateNetwork() {
         }
     }
     
+    for(auto m : fGradientMatrices) delete m;
+    for(auto m : fBiasGradientMatrices) delete m;
     fGradientMatrices.clear();
     fBiasGradientMatrices.clear();
 }
