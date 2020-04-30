@@ -159,7 +159,7 @@ void NeuralNetwork::AddToGradient() {
             for(int weight = 0; weight < fTopology.at(layer+1); weight++) {
                 current_val = fGradientMatrices.at(layer)->Element(weight, neuron);
                 update = fErrorMatrices.at(layer)->Element(weight, 0) * fLayers.at(layer)->Neurons().at(neuron)->Activation();
-                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer:"<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
+                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
                 fGradientMatrices.at(layer)->Element(weight, neuron, current_val + update);
                 if(fVerbose) cout<<", new matrix grad.: "<<fGradientMatrices.at(layer)->Element(weight, neuron)<<endl;
             }
@@ -179,18 +179,18 @@ void NeuralNetwork::UpdateNetwork() {
         for(int neuron = 0; neuron < fTopology.at(layer+1); neuron++) {
             current_val = fBiasMatrices.at(layer)->Element(neuron, 0);
             update = fLearningRate * fBiasGradientMatrices.at(layer)->Element(neuron, 0) / double(fBatchSize);
-            if(fVerbose) cout<<" -> layer: "<<layer<<", bias to neuron: "<<neuron<<" in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
+            if(fVerbose) cout<<" -> layer: "<<layer<<", bias to neuron: "<<neuron<<" in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<-update;
             fBiasMatrices.at(layer)->Element(neuron, 0, current_val - update);
-            if(fVerbose) cout<<", new bias matrix element: "<<fBiasGradientMatrices.at(layer)->Element(neuron, 0)<<endl;
+            if(fVerbose) cout<<", new bias matrix element: "<<fBiasMatrices.at(layer)->Element(neuron, 0)<<endl;
         }
         // update the matrices
         for(int neuron = 0; neuron < fTopology.at(layer); neuron++) { 
             for(int weight = 0; weight < fTopology.at(layer+1); weight++) {
                 current_val = fMatrices.at(layer)->Element(weight, neuron);
                 update = fLearningRate * fGradientMatrices.at(layer)->Element(weight, neuron) / double(fBatchSize);
-                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer:"<<layer+1<<", current_val: "<<current_val<<", update: "<<update;
+                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<-update;
                 fMatrices.at(layer)->Element(weight, neuron, current_val - update);
-                if(fVerbose) cout<<", new matrix element: "<<fGradientMatrices.at(layer)->Element(weight, neuron)<<endl;
+                if(fVerbose) cout<<", new matrix element: "<<fMatrices.at(layer)->Element(weight, neuron)<<endl;
             }
         }
     }
@@ -208,6 +208,10 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
     // - the batch size is how many examples to use in each gradient computation
     // - the learning rate is the factor that we multiply the gradient with before
     //   modifying the elements of the matrices and biases
+
+    cout<<"===================================================================="<<endl;
+    cout<<"           STARTING STOCHASTIC GRADIENT DECENT..."<<endl;
+    cout<<"===================================================================="<<endl;
 
     fLearningRate = learning_rate;
     fBatchSize = batch_size;    
@@ -231,7 +235,7 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
                 cout<<" -> input: ";
                 for(int i = 0; i < fTopology.front(); i++) cout<<training_data.at(num).first.at(i)<<", ";
                 cout<<endl;
-                cout<<" -> output: ";
+                cout<<" -> target: ";
                 for(int i = 0; i < fTopology.back(); i++) cout<<training_data.at(num).second.at(i)<<", ";
                 cout<<endl;
             }            
@@ -253,16 +257,23 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
             this->AddToGradient();
 
         }
+        
+        cout<<scientific<<" --> Batch: "<<batch<<"/"<<n_batches<<", current cost f'n: "<<this->Cost()<<"          \r"<<flush;
             
         // now that the gradients hav been calculated, we update the network with the
         // calculated gradient averaged over the batch size
         this->UpdateNetwork();
-
+        
         // we will print the error of this most recent example
         if(fPrintErrors) {
-            fErrorsFile<<fCost<<endl;
+            fErrorsFile<<batch<<"\t"<<fCost<<endl;
         }
     }
+    
+    cout<<endl;
+    cout<<"===================================================================="<<endl;
+    cout<<"            ENDING STOCHASTIC GRADIENT DECENT..."<<endl;
+    cout<<"===================================================================="<<endl;
 
 }
 
