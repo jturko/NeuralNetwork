@@ -38,10 +38,15 @@ class Layer
     vector<double> Activations();
     vector<double> WeightedInputs();
     
+    bool IsInput() { return fIsInput; }
+    void IsInput(bool val);
+
   private:
     string fNeuronType;
     int fnNeurons;
     vector<Neuron*> fNeurons;
+    
+    bool fIsInput;
 
 };
 

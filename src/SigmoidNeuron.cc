@@ -12,6 +12,8 @@ SigmoidNeuron::SigmoidNeuron(double activation) {
 }
 
 double SigmoidNeuron::Activation() {
+    if(fIsInput) return fWeightedInput;
+
     return 1./(1.+exp(-fWeightedInput));
 }
 

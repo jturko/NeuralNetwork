@@ -20,8 +20,12 @@ class Neuron
 
     void Print();
 
+    bool IsInput() { return fIsInput; }
+    void IsInput(bool val) { fIsInput = val; }
+    
   protected:
     double fWeightedInput;
+    bool fIsInput;
 };
 
 #endif

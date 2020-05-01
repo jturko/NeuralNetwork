@@ -20,6 +20,7 @@ Layer::Layer(int nNeurons, string neuronType) {
 }
 
 Matrix * Layer::RowVector() {
+    if(fIsInput) return RowVectorRaw();
     Matrix * m = new Matrix(1, fnNeurons);
     for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->Activation());
 
@@ -27,6 +28,7 @@ Matrix * Layer::RowVector() {
 }
 
 Matrix * Layer::ColumnVector() {
+    if(fIsInput) return ColumnVectorRaw();
     Matrix * m = new Matrix(fnNeurons, 1);
     for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->Activation());
 
@@ -92,6 +94,7 @@ void Layer::WeightedInputs(vector<double> vals) {
 }   
 
 vector<double> Layer::Activations() {
+    if(fIsInput) return WeightedInputs();
     vector<double> output;
     for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->Activation());
     return output;
@@ -101,5 +104,10 @@ vector<double> Layer::WeightedInputs() {
     vector<double> output;
     for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->WeightedInput());
     return output;
+}
+
+void Layer::IsInput(bool val) {
+    fIsInput = val;
+    for(auto n : fNeurons) n->IsInput(val);
 }
 

@@ -21,9 +21,9 @@ int main(int argc, char * argv[])
     for(int i=0; i<100; i++) rand();
 
     vector<int> topology;
-    topology.push_back(2);
-    topology.push_back(10);
-    topology.push_back(2);
+    topology.push_back(1);
+    topology.push_back(5);
+    topology.push_back(topology.front()+1);
 
     string neuronType = "SigmoidNeuron";
     bool verbose = false;
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
     
     double learning_rate = 0.5;
     int n_epochs = 10000;
-    int batch_size = 1000;
+    int batch_size = 100;
     int total_examples = n_epochs * batch_size;
 
     // create random training data
@@ -43,12 +43,17 @@ int main(int argc, char * argv[])
     vector< pair< vector<double>, vector<double> > > training_data;
     for(int epoch = 0; epoch < n_epochs; epoch++) {
         for(int example = 0; example < batch_size; example++) {
-            vector<double> data;
+            vector<double> input_data;
+            vector<double> target_data;
+            int count = 0;
             for(int neurons = 0; neurons < topology.front(); neurons++) {
-                double rndm = Utils::Rndm(-2., 2.);
-                data.push_back(rndm);
+                double rndm = (double)floor(Utils::Rndm(0.0000, 1.9999));
+                input_data.push_back(rndm);
+                if(rndm > 0.) count++;
             }
-            training_data.push_back(make_pair(data, data));
+            target_data.resize(input_data.size()+1);
+            target_data.at(count) = 1.0;
+            training_data.push_back(make_pair(input_data, target_data));
         }   
     }    
     cout<<" done!"<<endl;
@@ -59,7 +64,7 @@ int main(int argc, char * argv[])
 
     vector<double> test;
     for(int neurons = 0; neurons < topology.front(); neurons++) {
-        double rndm = Utils::Rndm(-2., 2.);
+        double rndm = (double)floor(Utils::Rndm(0.0000, 1.9999));
         test.push_back(rndm);
     }
     network->InputLayer(test);
@@ -68,6 +73,8 @@ int main(int argc, char * argv[])
     network->InputLayer()->ColumnVector()->Print();
     cout<<" NETWORK OUTPUT:"<<endl;
     network->OutputLayer()->ColumnVector()->Print();
+    cout<<" NETWORK OUTPUT RAW VALUES: "<<endl;
+    network->OutputLayer()->ColumnVectorRaw()->Print();
 
     return 0;
 }

@@ -32,6 +32,8 @@ void NeuralNetwork::BuildNetwork(bool random) {
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
     fLayers.push_back(l);
 
+    InputLayer()->IsInput(true);
+
     if(fPrintErrors) {
         fErrorsFile.open("errors.txt");
     }
@@ -73,20 +75,36 @@ void NeuralNetwork::ForwardPropagate() {
    
     if(fTargetLayerSet) {
         CalculateCost();
-        if(fVerbose) cout<<"  -> Cost f'n: "<<fCost<<endl;
+        if(fVerbose) {
+            cout<<"  ---> TARGET LAYER: "<<endl;
+            cout<<"  -> Weighted input values:"<<endl;
+            TargetLayer()->ColumnVectorRaw()->Print();
+            cout<<"  -> Activated values:"<<endl;
+            TargetLayer()->ColumnVector()->Print();
+            cout<<"  -> Cost f'n: "<<fCost<<endl;
+        }
     }
     if(fVerbose) cout<<"---> ending forward propagation..."<<endl;
 }
 
 double NeuralNetwork::CalculateCost() {
-    fTargetLayerSet = false;
+    if(!fTargetLayerSet) {
+        cerr<<"cannot calculate cost, no target layer set!"<<endl;
+        assert(false);
+        return -1;
+    }
     fCost = 0.;
     if(fCostDerivatives) { delete fCostDerivatives; fCostDerivatives = NULL; }
     fCostDerivatives = new Matrix(OutputLayer()->nNeurons(),1);
-    for(int i=0; i<fTopology.at(fLayers.size()-1); i++) { // quadratic cost
+    for(int i=0; i<fTopology.back(); i++) { // quadratic cost
+        if(fVerbose) {
+            cout<<" -> COST = "<<fCost<<" + ("<<TargetLayer()->Neurons().at(i)->Activation()<<" - "<<OutputLayer()->Neurons().at(i)->Activation()<<")^2"<<endl; 
+        }
         fCost += pow(TargetLayer()->Neurons().at(i)->Activation() - OutputLayer()->Neurons().at(i)->Activation(), 2.);
         fCostDerivatives->Element(i, 0, 2.*(OutputLayer()->Neurons().at(i)->Activation() - TargetLayer()->Neurons().at(i)->Activation()) );
     }
+    if(fVerbose) cout<<" -> FINAL COST = "<<fCost<<endl;
+    fTargetLayerSet = false;
     
     return fCost;
 }
@@ -209,7 +227,7 @@ void NeuralNetwork::UpdateNetwork() {
             for(int weight = 0; weight < fTopology.at(layer+1); weight++) {
                 current_val = fMatrices.at(layer)->Element(weight, neuron);
                 update = fLearningRate * fGradientMatrices.at(layer)->Element(weight, neuron) / double(fBatchSize);
-                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<"in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<-update;
+                if(fVerbose) cout<<" -> layer: "<<layer<<", neuron: "<<neuron<<", weight to neuron: "<<weight<<" in layer: "<<layer+1<<", current_val: "<<current_val<<", update: "<<-update;
                 fMatrices.at(layer)->Element(weight, neuron, current_val - update);
                 if(fVerbose) cout<<", new matrix element: "<<fMatrices.at(layer)->Element(weight, neuron)<<endl;
             }
@@ -254,11 +272,12 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
             int num = batch * fBatchSize + example;
             current_example = training_data.at(num);
             if(fVerbose) {
-                cout<<" -> current example: ";
-                cout<<" -> input: ";
+                cout<<" ---> STARTING EXAMPLE: "<<example<<"/"<<batch_size<<" IN BATCH: "<<batch<<"/"<<n_batches<<endl;
+                cout<<"  --> current example: "<<endl;
+                cout<<"   -> input: ";
                 for(int i = 0; i < fTopology.front(); i++) cout<<training_data.at(num).first.at(i)<<", ";
                 cout<<endl;
-                cout<<" -> target: ";
+                cout<<"   -> target: ";
                 for(int i = 0; i < fTopology.back(); i++) cout<<training_data.at(num).second.at(i)<<", ";
                 cout<<endl;
             }            
@@ -274,7 +293,8 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
 
             // calculate gradient for the current example
             this->InputLayer(current_example.first);
-            this->TargetLayer(current_example.second); // this is causing error 
+            this->TargetLayer(current_example.second); 
+            this->TargetLayer()->IsInput(true);
             this->ForwardPropagate();
             this->BackwardPropagate();
             this->AddToGradient();
@@ -301,8 +321,8 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
 }
 
 void NeuralNetwork::InputLayer(Layer * input) { 
-    if(input->nNeurons() != fTopology.at(0)) {
-        cerr<<"input->nNeurons()="<<input->nNeurons()<<" != fTopology->at(0)="<<fTopology.at(0)<<endl;
+    if(input->nNeurons() != fTopology.front()) {
+        cerr<<"input->nNeurons()="<<input->nNeurons()<<" != fTopology.front()="<<fTopology.front()<<endl;
         assert(false);
         return;
     }
@@ -311,23 +331,24 @@ void NeuralNetwork::InputLayer(Layer * input) {
         assert(false);
         return;
     }
-    fLayers.at(0) = input; 
+    if(fLayers.front()) { delete fLayers.front(); fLayers.front() = NULL; }
+    fLayers.front() = input; 
 }
 
 void NeuralNetwork::InputLayer(vector<double> values) {
-    if(values.size() != fTopology.at(0)) {
-        cerr<<"values.size()="<<values.size()<<" != fTopology.at(0)="<<fTopology.at(0)<<endl;
+    if(values.size() != fTopology.front()) {
+        cerr<<"values.size()="<<values.size()<<" != fTopology.front()="<<fTopology.front()<<endl;
         assert(false);
         return;
     }
-    for(int i=0; i<fTopology.at(0); i++) {
-        fLayers.at(0)->WeightedInput(i, values.at(i));
+    for(int i=0; i<fTopology.front(); i++) {
+        fLayers.front()->WeightedInput(i, values.at(i));
     }    
 }
 
 void NeuralNetwork::OutputLayer(Layer * output) { 
-    if(output->nNeurons() != fTopology.at(fLayers.size()-1)) {
-        cerr<<"output->nNeurons()="<<output->nNeurons()<<" != fTopology->at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+    if(output->nNeurons() != fTopology.back()) {
+        cerr<<"output->nNeurons()="<<output->nNeurons()<<" != fTopology.back()="<<fTopology.back()<<endl;
         assert(false);
         return;
     }
@@ -336,23 +357,24 @@ void NeuralNetwork::OutputLayer(Layer * output) {
         assert(false);
         return;
     }
-    fLayers.at(fLayers.size()-1) = output; 
+    if(fLayers.back()) { delete fLayers.back(); fLayers.back() = NULL; }
+    fLayers.back() = output; 
 }
 
 void NeuralNetwork::OutputLayer(vector<double> values) {
-    if(values.size() != fTopology.at(fLayers.size()-1)) {
-        cerr<<"values.size()="<<values.size()<<" != fTopology.at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+    if(values.size() != fTopology.back()) {
+        cerr<<"values.size()="<<values.size()<<" != fTopology.back()="<<fTopology.back()<<endl;
         assert(false);
         return;
     }
-    for(int i=0; i<fTopology.at(0); i++) {
-        fLayers.at(fLayers.size()-1)->WeightedInput(i, values.at(i));
+    for(int i=0; i<fTopology.back(); i++) {
+        fLayers.back()->WeightedInput(i, values.at(i));
     }    
 }
 
 void NeuralNetwork::TargetLayer(Layer * target) { 
-    if(target->nNeurons() != fTopology.at(fLayers.size()-1)) {
-        cerr<<"target->nNeurons()="<<target->nNeurons()<<" != fTopology->at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
+    if(target->nNeurons() != fTopology.back()) {
+        cerr<<"target->nNeurons()="<<target->nNeurons()<<" != fTopology.back()="<<fTopology.at(fLayers.size()-1)<<endl;
         assert(false);
         return;
     }
@@ -361,16 +383,13 @@ void NeuralNetwork::TargetLayer(Layer * target) {
         assert(false);
         return;
     }
-    if(fTargetLayer) {
-        delete fTargetLayer;
-        fTargetLayer = NULL;
-    }
+    if(fTargetLayer) { delete fTargetLayer; fTargetLayer = NULL; }
     fTargetLayer = target; 
     fTargetLayerSet = true;
 }
 
 void NeuralNetwork::TargetLayer(vector<double> values) {
-    if(values.size() != fTopology.at(fLayers.size()-1)) {
+    if(values.size() != fTopology.back()) {
         cerr<<"values.size()="<<values.size()<<" != fTopology.at("<<fLayers.size()-1<<")="<<fTopology.at(fLayers.size()-1)<<endl;
         assert(false);
         return;
@@ -378,7 +397,7 @@ void NeuralNetwork::TargetLayer(vector<double> values) {
     if(!fTargetLayer) {
         fTargetLayer = new Layer(fTopology.back(), fNeuronType);
     }
-    for(int i=0; i<fTopology.at(0); i++) {
+    for(int i=0; i<fTopology.back(); i++) {
         fTargetLayer->WeightedInput(i, values.at(i));
     }    
     fTargetLayerSet = true;

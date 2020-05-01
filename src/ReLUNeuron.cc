@@ -10,6 +10,8 @@ ReLUNeuron::ReLUNeuron(double activation) {
 }
 
 double ReLUNeuron::Activation() {
+    if(fIsInput) { return fWeightedInput; }
+
     if(fWeightedInput < 0.) return 0.;
     else return fWeightedInput;    
 }
