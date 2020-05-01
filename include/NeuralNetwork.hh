@@ -14,8 +14,8 @@ class NeuralNetwork
   public:
     NeuralNetwork(vector<int> topology, string neuronType, bool print_errors = true);
     
-    void BuildNetwork();
-    
+    void BuildNetwork(bool random = true);
+  
     void ForwardPropagate();
     void BackwardPropagate();
     double CalculateCost();

@@ -33,8 +33,8 @@ int main(int argc, char * argv[])
     NeuralNetwork * network = new NeuralNetwork(topology, neuronType);
     network->Verbose(verbose);
     
-    double learning_rate = 1.0;
-    int n_epochs = 1000;
+    double learning_rate = 0.5;
+    int n_epochs = 10000;
     int batch_size = 1000;
     int total_examples = n_epochs * batch_size;
 

@@ -19,14 +19,14 @@ NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType, bool print
     BuildNetwork();
 }
 
-void NeuralNetwork::BuildNetwork() {
+void NeuralNetwork::BuildNetwork(bool random) {
     cout<<"Building neural network, type: "<<fNeuronType<<endl;
     for(int i=0; i<nLayers()-1; i++) {
         Layer * l = new Layer(fTopology.at(i), fNeuronType);
         fLayers.push_back(l);
-        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i), true);
+        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i), random);
         fMatrices.push_back(m);
-        Matrix * bm = new Matrix(fTopology.at(i+1),1, true);
+        Matrix * bm = new Matrix(fTopology.at(i+1),1, random);
         fBiasMatrices.push_back(bm);
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
