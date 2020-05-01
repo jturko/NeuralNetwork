@@ -21,7 +21,7 @@ int main(int argc, char * argv[])
     for(int i=0; i<100; i++) rand();
 
     vector<int> topology;
-    topology.push_back(1);
+    topology.push_back(10);
     topology.push_back(5);
     topology.push_back(topology.front()+1);
 
