@@ -15,6 +15,7 @@ Layer::Layer(int nNeurons, string neuronType) {
             assert(false);
             return;
         }
+        neuron->IsInput(false); // false by default
         fNeurons.push_back(neuron);
     }
 }

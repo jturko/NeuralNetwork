@@ -30,6 +30,7 @@ void NeuralNetwork::BuildNetwork(bool random) {
         fBiasMatrices.push_back(bm);
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
+    l->IsInput(false);
     fLayers.push_back(l);
 
     InputLayer()->IsInput(true);
@@ -294,7 +295,6 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
             // calculate gradient for the current example
             this->InputLayer(current_example.first);
             this->TargetLayer(current_example.second); 
-            this->TargetLayer()->IsInput(true);
             this->ForwardPropagate();
             this->BackwardPropagate();
             this->AddToGradient();
@@ -333,6 +333,7 @@ void NeuralNetwork::InputLayer(Layer * input) {
     }
     if(fLayers.front()) { delete fLayers.front(); fLayers.front() = NULL; }
     fLayers.front() = input; 
+    this->InputLayer()->IsInput(true);
 }
 
 void NeuralNetwork::InputLayer(vector<double> values) {
@@ -344,6 +345,7 @@ void NeuralNetwork::InputLayer(vector<double> values) {
     for(int i=0; i<fTopology.front(); i++) {
         fLayers.front()->WeightedInput(i, values.at(i));
     }    
+    this->InputLayer()->IsInput(true);
 }
 
 void NeuralNetwork::OutputLayer(Layer * output) { 
@@ -359,6 +361,7 @@ void NeuralNetwork::OutputLayer(Layer * output) {
     }
     if(fLayers.back()) { delete fLayers.back(); fLayers.back() = NULL; }
     fLayers.back() = output; 
+    this->OutputLayer()->IsInput(false);
 }
 
 void NeuralNetwork::OutputLayer(vector<double> values) {
@@ -370,6 +373,7 @@ void NeuralNetwork::OutputLayer(vector<double> values) {
     for(int i=0; i<fTopology.back(); i++) {
         fLayers.back()->WeightedInput(i, values.at(i));
     }    
+    this->OutputLayer()->IsInput(false);
 }
 
 void NeuralNetwork::TargetLayer(Layer * target) { 
@@ -386,6 +390,7 @@ void NeuralNetwork::TargetLayer(Layer * target) {
     if(fTargetLayer) { delete fTargetLayer; fTargetLayer = NULL; }
     fTargetLayer = target; 
     fTargetLayerSet = true;
+    this->TargetLayer()->IsInput(true);
 }
 
 void NeuralNetwork::TargetLayer(vector<double> values) {
@@ -401,6 +406,7 @@ void NeuralNetwork::TargetLayer(vector<double> values) {
         fTargetLayer->WeightedInput(i, values.at(i));
     }    
     fTargetLayerSet = true;
+    this->TargetLayer()->IsInput(true);
 }
 
 void NeuralNetwork::Print() {

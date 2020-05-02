@@ -35,8 +35,8 @@ int main(int argc, char * argv[])
     NeuralNetwork * network = new NeuralNetwork(topology, neuronType);
     network->Verbose(verbose);
     
-    double learning_rate = 0.5;
-    int n_epochs = 10000;
+    double learning_rate = 1.0;
+    int n_epochs = 2500;
     int batch_size = 100;
     int total_examples = n_epochs * batch_size;
 
@@ -67,19 +67,51 @@ int main(int argc, char * argv[])
     network->SGD(training_data, batch_size, learning_rate);
     //network->Print();
 
-    vector<double> test;
-    for(int neurons = 0; neurons < topology.front(); neurons++) {
-       double rndm = Utils::Rndm(0., 10.);
-       test.push_back(rndm);
+    // testing the network
+    int n_tests = 1000;
+    int n_correct = 0;
+    for(int test = 0; test < n_tests; test++) {
+        vector<double> test_data;
+        int correct_biggest_element = 0;
+        double correct_biggest_value = -1.;
+        for(int neuron = 0; neuron < topology.front(); neuron++) {
+           double rndm = Utils::Rndm(0., 10.);
+           test_data.push_back(rndm);
+            if(correct_biggest_value < rndm) {
+                correct_biggest_element = neuron;
+                correct_biggest_value = rndm;
+            }
+        }
+        network->InputLayer(test_data);
+        network->ForwardPropagate();
+        
+        vector<double> result = network->OutputLayer()->Activations();    
+        int biggest_element = 0;
+        double biggest_value = -1.;
+        for(int neuron = 0; neuron < topology.back(); neuron++) {
+            if(biggest_value < result.at(neuron)) {
+                biggest_element = neuron;
+                biggest_value = result.at(neuron);
+            }
+        }
+
+        if(biggest_element == correct_biggest_element) { 
+            n_correct++;
+        }
+        else {
+            cout<<fixed;
+            cout<<" -> incorrect! biggest value was "<<correct_biggest_value<<" in neuron "<<correct_biggest_element;
+            cout<<" , but my guess was that it was element "<<biggest_element<<" which was "<<test_data.at(biggest_element)<<" ... sorry!"<<endl;
+            //cout<<" TEST INPUT:"<<endl;
+            //network->InputLayer()->ColumnVector()->Print();
+            //cout<<" NETWORK OUTPUT:"<<endl;
+            //network->OutputLayer()->ColumnVector()->Print();
+            //cout<<" NETWORK OUTPUT RAW VALUES: "<<endl;
+            //network->OutputLayer()->ColumnVectorRaw()->Print();
+        }
     }
-    network->InputLayer(test);
-    network->ForwardPropagate();
-    cout<<" TEST INPUT:"<<endl;
-    network->InputLayer()->ColumnVector()->Print();
-    cout<<" NETWORK OUTPUT:"<<endl;
-    network->OutputLayer()->ColumnVector()->Print();
-    cout<<" NETWORK OUTPUT RAW VALUES: "<<endl;
-    network->OutputLayer()->ColumnVectorRaw()->Print();
+    cout<<" -> test results: "<<n_correct<<"/"<<n_tests<<" ("<<100.*n_correct/n_tests<<"\%) correct"<<endl;
+
 
     // TRAINING THE NETWORK TO COUNT
     /*
