@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
 
     vector<int> topology;
     topology.push_back(5);
-    topology.push_back(10);
+    topology.push_back(100);
     topology.push_back(topology.front());
 
     string neuronType = "SigmoidNeuron";
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
     NeuralNetwork * network = new NeuralNetwork(topology, neuronType);
     network->Verbose(verbose);
     
-    double learning_rate = 0.1e-1;
+    double learning_rate = 0.5;
     int n_epochs = 10000;
     int batch_size = 100;
     int total_examples = n_epochs * batch_size;
