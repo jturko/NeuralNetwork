@@ -30,13 +30,11 @@ class Layer
     void WeightedInputs(vector<double> vals);
     void WeightedInputs(Matrix * m);
     void WeightedInput(int neuron, double value);
-
-    double WeightedInput(int neuron) { return fNeurons.at(neuron)->WeightedInput(); }
+    vector<double> WeightedInputs();
 
     string NeuronType() { return fNeuronType; }
 
     vector<double> Activations();
-    vector<double> WeightedInputs();
     
     bool IsInput() { return fIsInput; }
     void IsInput(bool val);

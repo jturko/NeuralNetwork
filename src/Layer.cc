@@ -20,19 +20,27 @@ Layer::Layer(int nNeurons, string neuronType) {
 }
 
 Matrix * Layer::RowVector() {
-    if(fIsInput) return RowVectorRaw();
-    Matrix * m = new Matrix(1, fnNeurons);
-    for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->Activation());
+    if(fIsInput) {
+        return RowVectorRaw();
+    } 
+    else {
+        Matrix * m = new Matrix(1, fnNeurons);
+        for(int i=0; i<fnNeurons; i++) m->Element(0, i, fNeurons.at(i)->Activation());
 
-    return m;
+        return m;
+    }
 }
 
 Matrix * Layer::ColumnVector() {
-    if(fIsInput) return ColumnVectorRaw();
-    Matrix * m = new Matrix(fnNeurons, 1);
-    for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->Activation());
+    if(fIsInput) {
+        return ColumnVectorRaw();
+    } 
+    else {
+        Matrix * m = new Matrix(fnNeurons, 1);
+        for(int i=0; i<fnNeurons; i++) m->Element(i, 0, fNeurons.at(i)->Activation());
 
-    return m;
+        return m;
+    }
 }
 
 Matrix * Layer::RowVectorRaw() {
@@ -75,7 +83,7 @@ void Layer::WeightedInputs(Matrix * m) {
         return;
     }
     
-    for(int i=0; i<fnNeurons; i++) {
+    for(int i = 0; i < fnNeurons; i++) {
         fNeurons.at(i)->WeightedInput(m->Element(i,0));
     }
 }   
@@ -88,26 +96,36 @@ void Layer::WeightedInputs(vector<double> vals) {
         return;
     }
     
-    for(int i=0; i<fnNeurons; i++) {
+    for(int i = 0; i < fnNeurons; i++) {
         fNeurons.at(i)->WeightedInput(vals.at(i));
     }
 }   
 
 vector<double> Layer::Activations() {
-    if(fIsInput) return WeightedInputs();
-    vector<double> output;
-    for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->Activation());
-    return output;
+    if(fIsInput) {
+        return WeightedInputs();
+    }
+    else {
+        vector<double> output;
+        for(auto n : fNeurons) {
+            output.push_back(n->Activation());
+        }
+        return output;
+    }
 }
 
 vector<double> Layer::WeightedInputs() {
     vector<double> output;
-    for(int i=0; i<fnNeurons; i++) output.push_back(fNeurons.at(i)->WeightedInput());
+    for(auto n : fNeurons) {
+        output.push_back(n->WeightedInput());
+    }
     return output;
 }
 
 void Layer::IsInput(bool val) {
     fIsInput = val;
-    for(auto n : fNeurons) n->IsInput(val);
+    for(auto n : fNeurons) {
+        n->IsInput(val);
+    }
 }
 
