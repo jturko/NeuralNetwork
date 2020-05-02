@@ -10,7 +10,7 @@ Matrix::Matrix(int nRows, int nCols, bool random) {
     for(int i=0; i<nRows; i++) {
         vector<double> tmp;
         for(int j=0; j<nCols; j++) {
-            if(random) tmp.push_back(Utils::RndmGaus(0.,0.001));
+            if(random) tmp.push_back(Utils::RndmGaus(0.,0.1e0));
             else tmp.push_back(0.0);
         }
         fElements.push_back(tmp);
