@@ -3,6 +3,7 @@
 
 Neuron::Neuron() {
     fWeightedInput = 0.0;
+    fIsInput = false;
 }
 
 Neuron::Neuron(double activation) {
