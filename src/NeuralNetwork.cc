@@ -1,5 +1,8 @@
 
 #include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
 
 #include "Utils.hh"
 #include "NeuralNetwork.hh"
@@ -301,7 +304,8 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
 
         }
         
-        cout<<scientific<<" --> Batch: "<<batch<<"/"<<n_batches<<", current cost f'n: "<<this->Cost()<<"          \r"<<flush;
+        printf(" --> Batch %d/%d (%.2f%%), current cost f'n: %.4e    \r", batch, n_batches, 100.*batch/n_batches, this->Cost());
+        fflush(stdout);
             
         // now that the gradients hav been calculated, we update the network with the
         // calculated gradient averaged over the batch size
