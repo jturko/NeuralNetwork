@@ -25,6 +25,7 @@ NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType, bool print
 
 void NeuralNetwork::BuildNetwork(bool random) {
     cout<<"Building neural network, type: "<<fNeuronType<<endl;
+    cout<<"Topology: "<<flush;
     for(int i=0; i<nLayers()-1; i++) {
         Layer * l = new Layer(fTopology.at(i), fNeuronType);
         fLayers.push_back(l);
@@ -33,12 +34,14 @@ void NeuralNetwork::BuildNetwork(bool random) {
         fMatrices.push_back(m);
         Matrix * bm = new Matrix(fTopology.at(i+1),1,random,1.); // initialize biases the old way
         fBiasMatrices.push_back(bm);
+        cout<<fTopology.at(i)<<" -> "<<flush;
     }
-    Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
+    Layer * l = new Layer(fTopology.back(), fNeuronType);
     l->IsInput(false);
     fLayers.push_back(l);
+    cout<<fTopology.back()<<endl;
 
-    InputLayer()->IsInput(true);
+    this->InputLayer()->IsInput(true);
 
     if(fPrintErrors) {
         fErrorsFile.open("errors.txt");
