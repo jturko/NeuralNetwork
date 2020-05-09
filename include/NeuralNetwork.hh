@@ -74,7 +74,9 @@ class NeuralNetwork
 
     bool fVerbose;
     bool fPrintErrors;
+    bool fPrintErrors2D;
     ofstream fErrorsFile;
+    ofstream fErrorsFile2D;
 
 };
 

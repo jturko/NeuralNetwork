@@ -4,13 +4,13 @@
 
 using namespace std;
 
-Matrix::Matrix(int nRows, int nCols, bool random) {
+Matrix::Matrix(int nRows, int nCols, bool random, double sigma) {
     fnRows = nRows;
     fnCols = nCols;
     for(int i=0; i<nRows; i++) {
         vector<double> tmp;
         for(int j=0; j<nCols; j++) {
-            if(random) tmp.push_back(Utils::RndmGaus(0.,1e-1));
+            if(random) tmp.push_back(Utils::RndmGaus(0.,sigma));
             else tmp.push_back(0.0);
         }
         fElements.push_back(tmp);

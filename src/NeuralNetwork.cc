@@ -11,7 +11,8 @@ NeuralNetwork::NeuralNetwork(vector<int> topology, string neuronType, bool print
     fTopology = topology;
     fNeuronType = neuronType;
     fPrintErrors = print_errors;
-    
+    fPrintErrors2D = print_errors;
+
     fVerbose = false;
     fBatchSize = 1;
     fLearningRate = 0.02; // small arbitrary value
@@ -27,9 +28,10 @@ void NeuralNetwork::BuildNetwork(bool random) {
     for(int i=0; i<nLayers()-1; i++) {
         Layer * l = new Layer(fTopology.at(i), fNeuronType);
         fLayers.push_back(l);
-        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i), random);
+        // try initializing matrices w/ std-dev defined by the number of input neurons
+        Matrix * m = new Matrix(fTopology.at(i+1),fTopology.at(i), random, 1./sqrt(fTopology.at(i))); 
         fMatrices.push_back(m);
-        Matrix * bm = new Matrix(fTopology.at(i+1),1, random);
+        Matrix * bm = new Matrix(fTopology.at(i+1),1,random,1.); // initialize biases the old way
         fBiasMatrices.push_back(bm);
     }
     Layer * l = new Layer(fTopology.at(fTopology.size()-1), fNeuronType);
@@ -40,6 +42,9 @@ void NeuralNetwork::BuildNetwork(bool random) {
 
     if(fPrintErrors) {
         fErrorsFile.open("errors.txt");
+    }
+    if(fPrintErrors2D) {
+        fErrorsFile2D.open("errors2d.txt");
     }
 }
 
@@ -301,6 +306,11 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
             this->ForwardPropagate();
             this->BackwardPropagate();
             this->AddToGradient();
+            
+            // we will print the error of this most recent example
+            if(fPrintErrors2D) {
+                fErrorsFile2D<<batch<<"\t"<<fCost<<endl;
+            }
 
         }
         
@@ -321,6 +331,9 @@ void NeuralNetwork::SGD(vector <pair <vector<double>,vector<double> > > training
     cout<<"===================================================================="<<endl;
     cout<<"            ENDING STOCHASTIC GRADIENT DECENT..."<<endl;
     cout<<"===================================================================="<<endl;
+
+    fErrorsFile.close();
+    fErrorsFile2D.close();
 
 }
 
